@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    <color name="Transparent">#00000000</color>
+    <color name="White">#FFFFFF</color>
+    <color name="background">#191A20</color>
+    <color name="on_top_background">#26272E</color>
+    <color name="selectedItem">#2F2F33</color>
+    <color name="OffWhite">#CDF1F1F1</color>
+    <color name="overlay">#004235</color>
+    <color name="rippleColor">#575757</color>
+    <color name="playlist_label">#978282B4</color>
+    <color name="playlist_background">#328282B4</color>
+    <color name="bottomsheet_background_color">#F72F2F33</color>
+
+</resources>
