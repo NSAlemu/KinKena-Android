@@ -16,8 +16,8 @@
 
         <ImageView
             android:id="@+id/card_abum_art_image"
-            android:layout_width="150dp"
-            android:layout_height="170dp"
+            android:layout_width="135dp"
+            android:layout_height="135dp"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"
@@ -35,7 +35,8 @@
             android:padding="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/card_abum_art_image">
 
             <TextView
                 android:id="@+id/card_abum_art_text"

@@ -38,24 +38,30 @@
 
                 <TextView
                     android:id="@+id/card_song_menu_artist"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="48dp"
                     android:layout_marginTop="2dp"
+                    android:layout_marginEnd="48dp"
+                    android:gravity="center"
                     android:text="Tilahun Gessese"
-                    app:layout_constraintEnd_toEndOf="@+id/card_song_menu_title"
-                    app:layout_constraintStart_toStartOf="@+id/card_song_menu_title"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/card_song_menu_title" />
 
                 <TextView
                     android:id="@+id/card_song_menu_title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="48dp"
                     android:layout_marginTop="16dp"
+                    android:layout_marginEnd="48dp"
                     android:fontFamily="@font/montserrat_bold"
+                    android:gravity="center"
                     android:text="Fikrish new Yegodagn"
                     android:textSize="15sp"
-                    app:layout_constraintEnd_toEndOf="@+id/card_song_menu_cover"
-                    app:layout_constraintStart_toStartOf="@+id/card_song_menu_cover"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/card_song_menu_cover" />
 
                 <LinearLayout
@@ -80,10 +86,11 @@
 
                         <ImageView
                             android:id="@+id/imageView4"
-                            android:layout_width="50dp"
+                            android:layout_width="35dp"
                             android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
                             android:adjustViewBounds="true"
-                            app:srcCompat="@drawable/ic_launcher_foreground" />
+                            app:srcCompat="@drawable/ic_like" />
 
                         <TextView
                             android:layout_width="match_parent"
@@ -103,10 +110,11 @@
 
                         <ImageView
                             android:id="@+id/imageView6"
-                            android:layout_width="50dp"
+                            android:layout_width="35dp"
                             android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
                             android:adjustViewBounds="true"
-                            app:srcCompat="@drawable/ic_launcher_foreground" />
+                            app:srcCompat="@drawable/ic_playlist_add" />
 
                         <TextView
                             android:id="@+id/card_song_menu_add_playlist"
@@ -127,13 +135,14 @@
 
                         <ImageView
                             android:id="@+id/imageView3"
-                            android:layout_width="50dp"
+                            android:layout_width="35dp"
                             android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
                             android:adjustViewBounds="true"
-                            app:srcCompat="@drawable/ic_launcher_foreground" />
+                            app:srcCompat="@drawable/ic_delete" />
 
                         <TextView
-                            android:id="@+id/card_song_menu_remove_from_playlist"
+                            android:id="@+id/card_song_item_delete_playlist"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center|start"
@@ -151,10 +160,11 @@
 
                         <ImageView
                             android:id="@+id/imageView8"
-                            android:layout_width="50dp"
+                            android:layout_width="35dp"
                             android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
                             android:adjustViewBounds="true"
-                            app:srcCompat="@drawable/ic_launcher_foreground" />
+                            app:srcCompat="@drawable/ic_queue_music_black_24dp" />
 
                         <TextView
                             android:id="@+id/card_song_menu_add_queue"
@@ -175,10 +185,11 @@
 
                         <ImageView
                             android:id="@+id/imageView10"
-                            android:layout_width="50dp"
+                            android:layout_width="35dp"
                             android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
                             android:adjustViewBounds="true"
-                            app:srcCompat="@drawable/ic_launcher_foreground" />
+                            app:srcCompat="@drawable/ic_artist" />
 
                         <TextView
                             android:id="@+id/card_song_menu_view_artist"

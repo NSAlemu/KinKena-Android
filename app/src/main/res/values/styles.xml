@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
@@ -10,6 +10,17 @@
         <item name="android:fontFamily">@font/montserrat</item>
         <item name="android:textSize">13sp</item>
         <item name="colorControlHighlight">@color/selectedItem</item>
+        <item name="colorSurface">@color/White</item>
+    </style>
+    <style name="LaunchTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/background</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="background">@color/background</item>
+        <item name="android:textColor">@color/White</item>
+        <item name="android:fontFamily">@font/montserrat</item>
+        <item name="android:textSize">13sp</item>
         <item name="colorSurface">@color/White</item>
     </style>
     <style name="TrackSelectionDialogThemeOverlay" parent="ThemeOverlay.AppCompat.Dialog.Alert">

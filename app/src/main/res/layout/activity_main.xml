@@ -18,7 +18,7 @@
 
         <fragment
             android:id="@+id/main_fragment_playlist_container"
-            class="com.example.ethiopianmusicapp.Playlist_tab"
+            class="com.ellpis.KinKena.Playlist_tab"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:visibility="visible"
@@ -28,7 +28,7 @@
             app:layout_constraintTop_toTopOf="parent" />
         <fragment
             android:id="@+id/main_fragment_search_container"
-            class="com.example.ethiopianmusicapp.SearchFragment"
+            class="com.ellpis.KinKena.SearchFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:visibility="visible"
@@ -39,7 +39,7 @@
 
         <fragment
             android:id="@+id/main_fragment_browse_container"
-            class="com.example.ethiopianmusicapp.Browse"
+            class="com.ellpis.KinKena.Browse"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:visibility="visible"
@@ -68,7 +68,7 @@
                 app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
                 <FrameLayout
-                    android:id="@+id/main_fragment_profile_container"
+                    android:id="@+id/main_fragment_music_player_container"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -93,7 +93,7 @@
             android:layout_height="0dp"
             android:layout_gravity="start"
             android:background="@color/background"
-            app:itemIconSize="32dp"
+            app:itemIconSize="25dp"
             app:itemIconTint="@color/nav_bar_selector"
             app:labelVisibilityMode="unlabeled"
             app:layout_constraintBottom_toBottomOf="parent"
