@@ -82,13 +82,14 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:paddingTop="10dp"
-                        android:paddingBottom="10dp">
+                        android:paddingBottom="10dp"
+                        android:visibility="gone">
 
                         <ImageView
                             android:id="@+id/imageView4"
-                            android:layout_width="35dp"
+                            android:layout_width="25dp"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
+                            android:layout_margin="10dp"
                             android:adjustViewBounds="true"
                             app:srcCompat="@drawable/ic_like" />
 
@@ -96,7 +97,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center|start"
-                            android:paddingStart="10dp"
+                            android:paddingStart="15dp"
                             android:text="Like"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -110,18 +111,18 @@
 
                         <ImageView
                             android:id="@+id/imageView6"
-                            android:layout_width="35dp"
+                            android:layout_width="25dp"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
+                            android:layout_margin="10dp"
                             android:adjustViewBounds="true"
-                            app:srcCompat="@drawable/ic_playlist_add" />
+                            app:srcCompat="@drawable/ic_rename" />
 
                         <TextView
                             android:id="@+id/card_song_menu_add_playlist"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center|start"
-                            android:paddingStart="10dp"
+                            android:paddingStart="15dp"
                             android:text="Add to a Playlist"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -135,9 +136,9 @@
 
                         <ImageView
                             android:id="@+id/imageView3"
-                            android:layout_width="35dp"
+                            android:layout_width="25dp"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
+                            android:layout_margin="10dp"
                             android:adjustViewBounds="true"
                             app:srcCompat="@drawable/ic_delete" />
 
@@ -146,7 +147,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center|start"
-                            android:paddingStart="10dp"
+                            android:paddingStart="15dp"
                             android:text="Remove from this playlist"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -156,13 +157,14 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:paddingTop="10dp"
-                        android:paddingBottom="10dp">
+                        android:paddingBottom="10dp"
+                        android:visibility="gone">
 
                         <ImageView
                             android:id="@+id/imageView8"
-                            android:layout_width="35dp"
+                            android:layout_width="25dp"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
+                            android:layout_margin="10dp"
                             android:adjustViewBounds="true"
                             app:srcCompat="@drawable/ic_queue_music_black_24dp" />
 
@@ -171,7 +173,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center|start"
-                            android:paddingStart="10dp"
+                            android:paddingStart="15dp"
                             android:text="Add to Queue"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -185,9 +187,9 @@
 
                         <ImageView
                             android:id="@+id/imageView10"
-                            android:layout_width="35dp"
+                            android:layout_width="25dp"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
+                            android:layout_margin="10dp"
                             android:adjustViewBounds="true"
                             app:srcCompat="@drawable/ic_artist" />
 
@@ -196,7 +198,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center|start"
-                            android:paddingStart="10dp"
+                            android:paddingStart="15dp"
                             android:text="View Artist"
                             android:textSize="14sp" />
                     </LinearLayout>

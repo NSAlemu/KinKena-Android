@@ -1,5 +1,6 @@
 package com.ellpis.KinKena;
 
+import android.app.Application;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -7,21 +8,27 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
+import android.os.SystemClock;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.palette.graphics.Palette;
 
+import com.ellpis.KinKena.Objects.Song;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerNotificationManager;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+
 public class ForegroundService extends Service {
     public static SimpleExoPlayer player;
-    public static final String CHANNEL_ID = "ForegroundServiceChannel";
     private PlayerNotificationManager playerNotificationManager;
+    private MediaSessionCompat mMediaSession;
 
 
     public ForegroundService() {
@@ -36,7 +43,7 @@ public class ForegroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         playerNotificationManager = new PlayerNotificationManager(
-                this, "5465362", 5,
+                this, getString( R.string.channel_name), 5,
                 createMediaDescriptionAdapter(),
                 new PlayerNotificationManager.NotificationListener() {
                     @Override
@@ -52,8 +59,10 @@ public class ForegroundService extends Service {
                         }
                     }
                 });
+        playerNotificationManager.setMediaSessionToken(mediaSession(MusicPlayerSheet.queue.get(player.getCurrentWindowIndex()), getApplication()).getSessionToken());
         playerNotificationManager.setSmallIcon(R.mipmap.ic_launcher);
         playerNotificationManager.setPlayer(player);
+
 //        startForeground(1,  MusicPlayerSheet.notification);
         //do heavy work on a background thread
         //stopSelf();
@@ -73,6 +82,7 @@ public class ForegroundService extends Service {
             @Nullable
             @Override
             public PendingIntent createCurrentContentIntent(Player player) {
+
                 return null;
             }
 
@@ -109,6 +119,26 @@ public class ForegroundService extends Service {
                 return MusicPlayerSheet.bitmap;
             }
         };
+    }
+    private MediaSessionCompat mediaSession(Song song, Application application) {
+
+        mMediaSession = new MediaSessionCompat(application, application.getPackageName());
+        mMediaSession.setMetadata(new MediaMetadataCompat.Builder()
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getSongName())
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.getArtistName())
+                .build());
+        mMediaSession.setCallback(MusicPlayerSheet.mMediaSessionCallback);
+        mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS | MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        PlaybackStateCompat state = new PlaybackStateCompat.Builder()
+                .setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                        PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID | PlaybackStateCompat.ACTION_PAUSE |
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
+                .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1, SystemClock.elapsedRealtime())
+                .build();
+        mMediaSession.setPlaybackState(state);
+        mMediaSession.setActive(true);
+        return mMediaSession;
+
     }
 
     @Override

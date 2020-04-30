@@ -48,7 +48,8 @@
                     android:id="@+id/launch_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/White" />
+                    android:backgroundTint="@color/White"
+                    android:inputType="textPassword"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 

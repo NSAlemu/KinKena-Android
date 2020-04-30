@@ -1,5 +1,8 @@
 package com.ellpis.KinKena;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -26,7 +29,6 @@ import java.util.ArrayList;
 import static com.google.android.exoplayer2.Player.REPEAT_MODE_OFF;
 
 public class MainActivity extends AppCompatActivity {
-    static String musicNotiID = "5465362";
     static int currentActive;
     static FragmentManager manager;
     static MainActivity context;
@@ -48,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         context = this;
         setContentView(R.layout.activity_main);
         setupBottomNavigation();
-
+        createNotificationChannel();
         bottomNavigationView = findViewById(R.id.main_bottom_nav);
         bottomNavigationViewMaxheight = bottomNavigationView.getHeight();
         bottomSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
@@ -91,7 +93,21 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.main_fragment_search_container).setVisibility(View.GONE);
         prepareUsername();
     }
-
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(getString(R.string.channel_name), name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
     public static void playSong(int playbackPosition, ArrayList<Song> playlist, boolean shuffled) {
         context.findViewById(R.id.main_player_sheet_container).setVisibility(View.VISIBLE);
         sheetBehavior = BottomSheetBehavior.from(context.findViewById(R.id.constraintLayout));

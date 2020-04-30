@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
@@ -36,6 +37,8 @@ public class SignUp extends AppCompatActivity {
     TextInputEditText confPassword;
     private String TAG="tag";
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private boolean isLoading=false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,8 +49,13 @@ public class SignUp extends AppCompatActivity {
     }
 
     public void signUp(View view){
+        if(isLoading){
+            return;
+        }
+
         if(!validSignUPForm())
             return;
+        isLoading=true;
         mAuth.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -55,7 +63,7 @@ public class SignUp extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
-
+                                isLoading=false;
 
                             Map<String, String> newUserMap = new HashMap<>();
                             newUserMap.put("username", username.getText().toString());
@@ -70,7 +78,12 @@ public class SignUp extends AppCompatActivity {
 
                         }
                     }
-                });
+                }).addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                isLoading=false;
+            }
+        });
 
     }
 

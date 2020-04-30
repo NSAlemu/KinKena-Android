@@ -2,6 +2,7 @@ package com.ellpis.KinKena;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,6 +40,7 @@ import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.io.ByteArrayOutputStream;
 import java.net.MalformedURLException;
@@ -284,10 +286,10 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         title.setText(playlist.getTitle());
         subtitle.setText(playlist.getSubtitle());
-        if (playlist.getThumbnail() != null ){
-            if(playlist.isFromFirebase()){
+        if (playlist.getThumbnail() != null) {
+            if (playlist.isFromFirebase()) {
                 Picasso.get().load("https://firebasestorage.googleapis.com" + playlist.getThumbnail()).into(cover);
-            }else{
+            } else {
                 Picasso.get().load("http://www.arifzefen.com" + playlist.getThumbnail()).into(cover);
             }
         }
@@ -316,7 +318,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
 
     private View.OnClickListener shuffleOnClickListener() {
         return v -> {
-            MainActivity.playSong((new Random()).nextInt(playlist.getSongs().size() - 2)+1, (ArrayList<Song>) playlist.getSongs(), true);
+            MainActivity.playSong((new Random()).nextInt(playlist.getSongs().size() - 2) + 1, (ArrayList<Song>) playlist.getSongs(), true);
         };
     }
 
@@ -341,7 +343,74 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                 if (resultCode == RESULT_OK) {
                     Bundle extras = imageReturnedIntent.getExtras();
                     Bitmap imageBitmap = (Bitmap) extras.get("data");
-                    imageBitmap=Bitmap.createBitmap(imageBitmap, 0,0,imageBitmap.getWidth(), imageBitmap.getWidth());
+                    if (imageBitmap == null) {
+                        Picasso.get().load(imageReturnedIntent.getData()).into(new Target() {
+                            @Override
+                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                try {
+                                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getWidth());
+                                }catch (IllegalArgumentException ex){
+                                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getHeight(), bitmap.getHeight());
+                                }
+
+
+                                cover.setImageBitmap(bitmap);
+
+                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                                byte[] byteArray = stream.toByteArray();
+
+                                final StorageReference firebaseImageFolder = FirebaseStorage.getInstance()
+                                        .getReference()
+                                        .child(currentUserID + "/" + playlist.getId() + "/playlistCover.jpg");
+
+                                UploadTask uploadTask = firebaseImageFolder.putBytes(byteArray);
+
+                                Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                                    @Override
+                                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                                        if (!task.isSuccessful()) {
+                                            throw task.getException();
+                                        }
+
+                                        // Continue with the task to get the download URL
+                                        return firebaseImageFolder.getDownloadUrl();
+                                    }
+                                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Uri> task) {
+                                        if (task.isSuccessful()) {
+
+                                            Uri downloadUri = task.getResult();
+                                            try {
+                                                db.collection("Users").document(currentUserID)
+                                                        .collection("Playlists").document(playlistID)
+                                                        .update("thumbnail", (new URL(downloadUri.toString())).getPath() + "?" + downloadUri.getQuery());
+                                            } catch (MalformedURLException e) {
+                                                e.printStackTrace();
+                                            }
+                                        } else {
+                                            // Handle failures
+                                            // ...
+                                        }
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+                            }
+
+                            @Override
+                            public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                            }
+                        });
+                        return;
+                    }
+
+                    imageBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getWidth());
 
                     cover.setImageBitmap(imageBitmap);
 
@@ -353,7 +422,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                             .getReference()
                             .child(currentUserID + "/" + playlist.getId() + "/playlistCover.jpg");
 
-                    UploadTask uploadTask  = firebaseImageFolder.putBytes(byteArray);
+                    UploadTask uploadTask = firebaseImageFolder.putBytes(byteArray);
 
                     Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                         @Override
@@ -374,7 +443,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                                 try {
                                     db.collection("Users").document(currentUserID)
                                             .collection("Playlists").document(playlistID)
-                                            .update("thumbnail", (new URL(downloadUri.toString())).getPath()+"?"+downloadUri.getQuery());
+                                            .update("thumbnail", (new URL(downloadUri.toString())).getPath() + "?" + downloadUri.getQuery());
                                 } catch (MalformedURLException e) {
                                     e.printStackTrace();
                                 }

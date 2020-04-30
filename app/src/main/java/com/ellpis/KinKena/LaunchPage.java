@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseApp;
@@ -31,6 +32,8 @@ public class LaunchPage extends AppCompatActivity {
 
     String currentUserID = FirebaseAuth.getInstance().getUid();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private boolean isLoading = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,27 +46,19 @@ public class LaunchPage extends AppCompatActivity {
         }
         setContentView(R.layout.activity_launch_page);
         ButterKnife.bind(this);
-//
-//        Playlist playlist1 = new Playlist();
-//        playlist1.setTitle("Favorites");
-//        Song song  = new Song();
-//        song.setSongId(1589);
-//        song.setSongName("Firkrish");
-//        Song song2  = new Song();
-//        song.setSongId(12342349);
-//        song.setSongName("new");
-//        List<Song> songs =new ArrayList<>();
-//        songs.add(song);
-//        songs.add(song2);
-//        playlist1.setSongs(songs);
 
-
-        Toast.makeText(LaunchPage.this, "saved",
-                Toast.LENGTH_SHORT).show();
 
     }
 
     public void logIn(View view) {
+        if(email.getText().toString().isEmpty()||email.getText().toString()==null||password.getText().toString().isEmpty()||password.getText().toString()==null){
+            Toast.makeText(this,"Username and password cannot be empty",Toast.LENGTH_LONG).show();
+            return;
+        }
+        if(isLoading){
+            return;
+        }
+        isLoading=true;
         mAuth.signInWithEmailAndPassword(email.getText().toString(), password.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -72,7 +67,7 @@ public class LaunchPage extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-
+                            isLoading = false;
                             startActivity(new Intent(LaunchPage.this, MainActivity.class));
                         } else {
                             // If sign in fails, display a message to the user.
@@ -83,7 +78,12 @@ public class LaunchPage extends AppCompatActivity {
 
                         // ...
                     }
-                });
+                }).addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                isLoading = false;
+            }
+        });
     }
     public void createAccount(View view) {
         startActivity(new Intent(this, SignUp.class));

@@ -9,7 +9,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
@@ -64,7 +63,7 @@ import static com.google.android.exoplayer2.Player.STATE_READY;
 
 
 public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListener,
-        Player.EventListener {
+        Player.EventListener{
 
     private String audioURL = "";
     private boolean playWhenReady = true;
@@ -112,13 +111,14 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     static ArrayList<Song> queue;
     static Bitmap bitmap;
     static Notification notification;
+    static MediaSessionCompat.Callback mMediaSessionCallback;
     String ArifzefenSongPath = "http://www.arifzefen.com/json/playSong.php?id=";
     DefaultTrackSelector trackSelector;
     //    private MediaSessionCompat mMediaSession;
     PlaybackStateCompat.Builder mStateBuilder;
     static MediaSessionConnector mediaSessionConnector;
     float volume;
-    MediaSessionCompat mMediaSession;
+
 
     public static MusicPlayerSheet newInstance(int currentWindow, ArrayList<Song> playlist, boolean shuffled) {
         MusicPlayerSheet myFragment = new MusicPlayerSheet();
@@ -231,29 +231,34 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         miniPlaypause.setImageDrawable(getActivity().getDrawable(R.drawable.exo_controls_pause));
         ForegroundService.player.addListener(this);
         setupControls();
+        mMediaSessionCallback = setupMediaSessionCallback();
         setViews(queue.get(ForegroundService.player.getCurrentWindowIndex()));
-        mediaSession(queue.get(ForegroundService.player.getCurrentWindowIndex()));
+        sendMediaStyleNotification();
         setRepeatMode();
         setShuffleMode();
 
     }
-//    @Override
-//    public MediaBrowserServiceCompat.BrowserRoot onGetRoot(String clientPackageName, int clientUid,
-//                                                           Bundle rootHints) {
-//
-//        // (Optional) Control the level of access for the specified package name.
-//        // You'll need to write your own logic to do this.
-//        if (allowBrowsing(clientPackageName, clientUid)) {
-//            // Returns a root ID that clients can use with onLoadChildren() to retrieve
-//            // the content hierarchy.
-//            return new MediaBrowserServiceCompat.BrowserRoot(MY_MEDIA_ROOT_ID, null);
-//        } else {
-//            // Clients can connect, but this BrowserRoot is an empty hierachy
-//            // so onLoadChildren returns nothing. This disables the ability to browse for content.
-//            return new MediaBrowserServiceCompat.BrowserRoot(MY_EMPTY_MEDIA_ROOT_ID, null);
-//
-//
-//    }
+    MediaSessionCompat.Callback setupMediaSessionCallback(){
+        return new MediaSessionCompat.Callback() {
+            @Override
+            public void onPause() {
+                playpauseControl.performClick();
+                super.onPause();
+            }
+
+            @Override
+            public void onSkipToNext() {
+                nextControl.performClick();
+                super.onSkipToNext();
+            }
+
+            @Override
+            public void onSkipToPrevious() {
+                previousControl.performClick();
+                super.onSkipToPrevious();
+            }
+        };
+    }
 
     @Override
     public void onDestroy() {
@@ -305,82 +310,16 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         }
     }
 
-    private void mediaSession(Song song) {
-
-        mMediaSession = new MediaSessionCompat(getContext(), getActivity().getPackageName());
-        mMediaSession.setMetadata(new MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getSongName())
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.getArtistName())
-                .build());
-        mMediaSession.setCallback(mMediaSessionCallback);
-        mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS | MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
-        PlaybackStateCompat state = new PlaybackStateCompat.Builder()
-                .setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PLAY_PAUSE |
-                        PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID | PlaybackStateCompat.ACTION_PAUSE |
-                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
-                .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1, SystemClock.elapsedRealtime())
-                .build();
-        mMediaSession.setPlaybackState(state);
-        mMediaSession.setActive(true);
-        mediaSessionConnector = new MediaSessionConnector(mMediaSession);
-        mediaSessionConnector.setPlayer(ForegroundService.player);
-
+    private void sendMediaStyleNotification() {
         Intent serviceIntent = new Intent(getContext(), ForegroundService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ContextCompat.startForegroundService(getContext(), serviceIntent);
         } else {
             getContext().startService(serviceIntent);
         }
-
     }
 
-    private MediaSessionCompat.Callback mMediaSessionCallback = new MediaSessionCompat.Callback() {
 
-        @Override
-        public void onPlay() {
-            super.onPlay();
-            playpauseControl.performClick();
-        }
-
-        @Override
-        public void onPause() {
-            super.onPause();
-            playpauseControl.performClick();
-        }
-
-        @Override
-        public void onSkipToNext() {
-            super.onSkipToNext();
-            nextControl.performClick();
-        }
-
-        @Override
-        public void onSkipToPrevious() {
-            super.onSkipToPrevious();
-            previousControl.performClick();
-        }
-
-        @Override
-        public void onPlayFromMediaId(String mediaId, Bundle extras) {
-            super.onPlayFromMediaId(mediaId, extras);
-        }
-    };
-
-    private void setMediaPlaybackState(int state) {
-        PlaybackStateCompat.Builder playbackstateBuilder = new PlaybackStateCompat.Builder();
-        if (state == PlaybackStateCompat.STATE_PLAYING) {
-            playbackstateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_PAUSE)
-                    .setActions(PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
-                    .setActions(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
-            ;
-        } else {
-            playbackstateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_PLAY)
-                    .setActions(PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
-                    .setActions(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
-        }
-        playbackstateBuilder.setState(state, ForegroundService.player.getContentPosition(), 0);
-        mMediaSession.setPlaybackState(playbackstateBuilder.build());
-    }
 
     /**
      * Not yet Implemented
@@ -571,6 +510,8 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         ForegroundService.player.setPlayWhenReady(true);
 
     }
+
+
 
 
 }

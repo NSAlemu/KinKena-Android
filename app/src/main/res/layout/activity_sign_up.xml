@@ -141,6 +141,7 @@
         android:backgroundTint="@color/OffWhite"
         android:fontFamily="@font/montserrat_bold"
         android:minHeight="55dp"
+        android:onClick="signUp"
         android:text="Sign  Up"
         android:textAllCaps="false"
         android:textColor="@color/background"
