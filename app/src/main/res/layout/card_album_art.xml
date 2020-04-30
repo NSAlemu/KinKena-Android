@@ -16,8 +16,8 @@
 
         <ImageView
             android:id="@+id/card_abum_art_image"
-            android:layout_width="135dp"
-            android:layout_height="135dp"
+            android:layout_width="160dp"
+            android:layout_height="155dp"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"

@@ -2,6 +2,7 @@ package com.ellpis.KinKena;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -19,6 +20,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -109,6 +111,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public static void playSong(int playbackPosition, ArrayList<Song> playlist, boolean shuffled) {
+        if(playlist==null || playbackPosition>=playlist.size() || playlist.size()==0){
+            return;
+        }
         context.findViewById(R.id.main_player_sheet_container).setVisibility(View.VISIBLE);
         sheetBehavior = BottomSheetBehavior.from(context.findViewById(R.id.constraintLayout));
 
@@ -190,10 +195,29 @@ public class MainActivity extends AppCompatActivity {
 
         if (sheetBehavior != null && sheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        } else {
-            super.onBackPressed();
+        } else if(getSupportFragmentManager().getBackStackEntryCount()==0){
+            new MaterialAlertDialogBuilder(context)
+                    .setTitle("You are about to leave the App")
+                    .setPositiveButton("Leave", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                            System.exit(0);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
 
+                        }
+                    })
+                    .setBackground(getResources().getDrawable(R.drawable.dialog_backgound))
+                    .show();
         }
+        else {
+            super.onBackPressed();
+        }
+
 
     }
 }

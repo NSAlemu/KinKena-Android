@@ -6,15 +6,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ellpis.KinKena.Adapters.AlbumArtAdapter;
 import com.ellpis.KinKena.Adapters.AlbumArtHorizAdapter;
+import com.ellpis.KinKena.Objects.Featured;
 import com.ellpis.KinKena.Objects.Playlist;
 import com.ellpis.KinKena.Retrofit.MusicRetrofit;
 import com.google.gson.Gson;
@@ -86,16 +89,19 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
             "curated/weddingsongs",
             "#curated/workout"};
 
+    List<Featured> allPlaylists = new ArrayList<>();
 
     private Retrofit retrofit;
     List<Playlist> featuredPlaylists = new ArrayList<>();
     List<Playlist> popularPlaylists = new ArrayList<>();
     List<Playlist> GenrePlaylists = new ArrayList<>();
     List<Playlist> topPicksPlaylists = new ArrayList<>();
+    List<Playlist> morePlaylists = new ArrayList<>();
     AlbumArtAdapter featuredAdapter;
     AlbumArtHorizAdapter popularAdapter;
     AlbumArtAdapter GenreAdapter;
     AlbumArtAdapter topPicksAdapter;
+    AlbumArtAdapter morePlaylistsAdapter;
     @BindView(R.id.browse_featured_rv)
     RecyclerView featuredRv;
     @BindView(R.id.browse_popular_rv)
@@ -104,11 +110,15 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
     RecyclerView genreRv;
     @BindView(R.id.browse_top_pic_rv)
     RecyclerView topPicksRv;
+    @BindView(R.id.browse_more_rv)
+    RecyclerView morePlaylistsRv;
+    @BindView(R.id.browse_load_more_btn)
+    TextView morePlaylistsBtn;
     Map<String, String[]> linkMap = new HashMap<>();
     Map<String, List<Playlist>> playlistMap = new HashMap<>();
     Map<String, RecyclerView.Adapter> adapterMap = new HashMap<>();
     Map<String, RecyclerView> recyclerViewMap = new HashMap<>();
-    private boolean loading = false;
+    private int loadedPlaylists;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -121,15 +131,16 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        getAllData();
         linkMap.put("Featured", featuredLinks);
         linkMap.put("popular", popularLinks);
         linkMap.put("Genre", genreLinks);
         linkMap.put("TopPicks", topPicksLinks);
 
         for (Map.Entry<String, String[]> entry : linkMap.entrySet()) {
-            List<String> ArrayList= Arrays.asList(entry.getValue());
+            List<String> ArrayList = Arrays.asList(entry.getValue());
             Collections.shuffle(ArrayList);
-            linkMap.put(entry.getKey(), (String[])ArrayList.toArray());
+            linkMap.put(entry.getKey(), (String[]) ArrayList.toArray());
         }
 
         featuredAdapter = new AlbumArtAdapter(featuredPlaylists);
@@ -159,17 +170,18 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
         featuredAdapter.setClickListener(this);
 
 
+
         for (Map.Entry<String, RecyclerView> entry : recyclerViewMap.entrySet()) {
             if (entry.getKey().equals("popular")) {
                 setupRecyclerview(LinearLayoutManager.VERTICAL, entry.getValue(), entry.getKey());
-                loadMore( entry.getKey(), 0);
+                loadData(entry.getKey(), 0);
             } else {
                 setupRecyclerview(LinearLayoutManager.HORIZONTAL, entry.getValue(), entry.getKey());
-                loadMore( entry.getKey(), 0);
+                loadData(entry.getKey(), 0);
             }
 
         }
-
+        morePlaylistsBtn.setOnClickListener(loadMorePlaylist());
 
     }
 
@@ -194,7 +206,7 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
                         @Override
                         public void run() {
                             Playlist playlist = resBookSearch.body();
-                            playlist.setOwnerID(firstPath+"/"+secondPath);
+                            playlist.setOwnerID(firstPath + "/" + secondPath);
                             playlist.setFromFirebase(false);
                             list.add(playlist);
 
@@ -205,11 +217,57 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
                 } else {
                     Log.e("retrofit res", resBookSearch.errorBody().toString());
                 }
-                loading = false;
             }
 
             @Override
             public void onFailure(Call<Playlist> call, Throwable t) {
+                Log.e("retrofit", t.getMessage() + "\n" + t.toString());
+            }
+        });
+
+    }
+
+    void getAllData() {
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+        if (retrofit == null) {
+            retrofit = new retrofit2.Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create(gson))
+                    .build();
+        }
+        MusicRetrofit service = retrofit.create(MusicRetrofit.class);
+        Call<List<Featured>> call = service.getFeatured();
+        call.enqueue(new retrofit2.Callback<List<Featured>>() {
+
+            @Override
+            public void onResponse(Call<List<Featured>> call, Response<List<Featured>> resBookSearch) {
+                if (resBookSearch.errorBody() == null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            allPlaylists.addAll(resBookSearch.body());
+                            morePlaylistsAdapter = new AlbumArtAdapter(morePlaylists);
+                            GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+                            morePlaylistsAdapter.setClickListener(Browse.this);
+                            for(int i=0; i<6 && i<allPlaylists.size();i++){
+                                Featured featured = allPlaylists.get(i);
+                                getData("featured",featured.getId()+"",morePlaylists, morePlaylistsAdapter);
+                            }
+
+                            morePlaylistsRv.setAdapter(morePlaylistsAdapter);
+                            morePlaylistsRv.setLayoutManager(gridLayoutManager);
+                        }
+                    });
+
+                } else {
+                    Log.e("retrofit res", resBookSearch.errorBody().toString());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Featured>> call, Throwable t) {
                 Log.e("retrofit", t.getMessage() + "\n" + t.toString());
             }
         });
@@ -228,38 +286,51 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
 
     }
 
-    private void loadMore(String key, int totalItemCount) {
-        for (int i = totalItemCount; i < totalItemCount + 5 && i < linkMap.get(key).length; i++) {
+    private void loadData(String key, int totalItemCount) {
+        for (int i = totalItemCount; i < linkMap.get(key).length; i++) {
             String url = linkMap.get(key)[i];
             int s = url.indexOf('/');
             try {
-                loading = true;
                 getData(url.substring(0, s), url.substring(s + 1), playlistMap.get(key), adapterMap.get(key));
             } catch (Exception e) {
             }
         }
     }
- class WrapContentLinearLayoutManager extends LinearLayoutManager {
-
-    String key;
-
-    public WrapContentLinearLayoutManager(Context context, int orientation, boolean reverseLayout, String key) {
-        super(context, orientation, reverseLayout);
-        this.key = key;
+    private View.OnClickListener loadMorePlaylist(){
+        return v -> {
+            int i=loadedPlaylists;
+            for(; i<loadedPlaylists+6 && i<allPlaylists.size();i++){
+                Featured featured = allPlaylists.get(i);
+                getData("featured",featured.getId()+"",morePlaylists, morePlaylistsAdapter);
+            }
+            loadedPlaylists=i;
+            if(loadedPlaylists>= allPlaylists.size()-1){
+                morePlaylistsBtn.setVisibility(View.GONE);
+            }
+        };
     }
+    class WrapContentLinearLayoutManager extends LinearLayoutManager {
 
-    @Override
-    public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
-        try {
-            super.onLayoutChildren(recycler, state);
-        } catch (IndexOutOfBoundsException e) {
-            Log.e("TAG", e.toString()+"\n"+key);
+        String key;
+
+        public WrapContentLinearLayoutManager(Context context, int orientation, boolean reverseLayout, String key) {
+            super(context, orientation, reverseLayout);
+            this.key = key;
+        }
+
+        @Override
+        public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+            try {
+                super.onLayoutChildren(recycler, state);
+            } catch (IndexOutOfBoundsException e) {
+                Log.e("TAG", e.toString() + "\n" + key);
+            }
         }
     }
-}
+
     @Override
     public void onItemClick(View view, int position, Playlist result) {
-        getFragmentManager().beginTransaction().replace(getId(), PlaylistItemFragment.newInstance(result.getOwnerID(),result.isFromFirebase()))
+        getFragmentManager().beginTransaction().replace(getId(), PlaylistItemFragment.newInstance(result.getOwnerID(), result.isFromFirebase()))
                 .addToBackStack(null)
                 .commit();
     }

@@ -189,11 +189,15 @@ public class ArtistItemFragment extends Fragment {
 
     private View.OnClickListener shuffleOnClickListener() {
         return v -> {
-            ArrayList<Song> tempSongs = new ArrayList<>();
-            for (Album album : albumList) {
-                tempSongs.addAll(album.getSongs());
+
+                ArrayList<Song> tempSongs = new ArrayList<>();
+                for (Album album : albumList) {
+                    tempSongs.addAll(album.getSongs());
+                }
+            if(tempSongs.size()>0){
+                MainActivity.playSong((new Random()).nextInt(tempSongs.size() - 1), tempSongs, true);
             }
-            MainActivity.playSong((new Random()).nextInt(tempSongs.size() - 1), tempSongs, true);
+
         };
     }
 }

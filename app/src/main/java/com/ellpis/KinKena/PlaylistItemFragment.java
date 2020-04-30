@@ -318,6 +318,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
 
     private View.OnClickListener shuffleOnClickListener() {
         return v -> {
+            if(playlist!=null && playlist.getSongs().size()>0)
             MainActivity.playSong((new Random()).nextInt(playlist.getSongs().size() - 2) + 1, (ArrayList<Song>) playlist.getSongs(), true);
         };
     }

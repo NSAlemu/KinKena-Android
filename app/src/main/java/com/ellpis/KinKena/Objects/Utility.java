@@ -51,8 +51,9 @@ public class Utility {
         lp.topMargin = 50;
         input.setLayoutParams(lp);
         input.setHint("Playlist Name");
-        input.setBackgroundColor(context.getResources().getColor(R.color.selectedItem));
-        input.setTextColor(context.getResources().getColor(R.color.OffWhite));
+        input.setHintTextColor(context.getResources().getColor(R.color.White));
+        input.setBackgroundColor(context.getResources().getColor(R.color.OffWhite));
+        input.setTextColor(context.getResources().getColor(R.color.White));
         ColorStateList colorStateList = ColorStateList.valueOf(context.getResources().getColor(R.color.selectedItem));
         ViewCompat.setBackgroundTintList(input, colorStateList);
         LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(

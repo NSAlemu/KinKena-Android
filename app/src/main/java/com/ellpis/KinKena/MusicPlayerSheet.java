@@ -63,7 +63,7 @@ import static com.google.android.exoplayer2.Player.STATE_READY;
 
 
 public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListener,
-        Player.EventListener{
+        Player.EventListener {
 
     private String audioURL = "";
     private boolean playWhenReady = true;
@@ -188,7 +188,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     }
 
 
-    private ConcatenatingMediaSource setPlaylist() {
+    private ConcatenatingMediaSource getConcatenatingMediaSource() {
         if (shuffled) {
             Collections.shuffle(queue);
         }
@@ -200,8 +200,11 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     }
 
     private MediaSource buildMediaSource(Uri uri, int playbackPosition) {
-
-        return new ProgressiveMediaSource.Factory(
+//        Mp3Extractor mp3Extractor = new Mp3Extractor.Flags()
+//        DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+//        extractorsFactory.setMp3ExtractorFlags(Mp3Extractor.FLAG_DISABLE_ID3_METADATA)
+//        extractorsFactory.createExtractors();
+        ProgressiveMediaSource progressiveMediaSource = new ProgressiveMediaSource.Factory(
                 () -> {
                     HttpDataSource dataSource =
                             new DefaultHttpDataSource("exoplayer-codelab");
@@ -209,9 +212,12 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
                     dataSource.setRequestProperty("Cookies", "_ga=GA1.2.436202454.1587347535; _gid=GA1.2.921082897.1587347535; _ga=GA1.2.1355987553.1587348657; _gid=GA1.2.1039899393.1587847357; _gat=1");
                     dataSource.setRequestProperty("Referer", "http://www.arifzefen.com/");
                     return dataSource;
+
                 })
                 .setTag(playbackPosition)
                 .createMediaSource(uri);
+
+        return progressiveMediaSource;
     }
 
     private void initializePlayer() {
@@ -219,7 +225,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         ForegroundService.player = new SimpleExoPlayer.Builder(getContext())
                 .setTrackSelector(trackSelector)
                 .build();
-        ConcatenatingMediaSource concatenatingMediaSource = setPlaylist();
+        ConcatenatingMediaSource concatenatingMediaSource = getConcatenatingMediaSource();
         ForegroundService.player.setPlayWhenReady(playWhenReady);
         ForegroundService.player.seekTo(currentWindow, playbackPosition);
         ForegroundService.player.prepare(concatenatingMediaSource, false, false);
@@ -238,7 +244,8 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         setShuffleMode();
 
     }
-    MediaSessionCompat.Callback setupMediaSessionCallback(){
+
+    MediaSessionCompat.Callback setupMediaSessionCallback() {
         return new MediaSessionCompat.Callback() {
             @Override
             public void onPause() {
@@ -318,7 +325,6 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
             getContext().startService(serviceIntent);
         }
     }
-
 
 
     /**
@@ -510,8 +516,6 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         ForegroundService.player.setPlayWhenReady(true);
 
     }
-
-
 
 
 }

@@ -96,7 +96,7 @@
                         android:background="@color/colorPrimary"
                         android:drawableEnd="@drawable/ic_shuffle"
                         android:gravity="center|start"
-                        android:minHeight="30dp"
+                        android:minHeight="40dp"
                         android:padding="5dp"
                         android:paddingStart="20dp"
                         android:text="Shuffle Play   "
@@ -107,20 +107,6 @@
                         app:layout_constraintStart_toStartOf="@+id/guideline2" />
 
                 </androidx.cardview.widget.CardView>
-
-                <ImageButton
-                    android:id="@+id/playlist_item_overflow_menu"
-                    android:layout_width="wrap_content"
-                    android:layout_height="35dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="16dp"
-                    android:adjustViewBounds="true"
-                    android:background="@color/Transparent"
-                    android:padding="2dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_more_horiz_black_24dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
 
 
                 <androidx.constraintlayout.widget.Guideline
@@ -186,7 +172,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginEnd="15dp"
                 android:text="Top Tracks"
                 android:textSize="18dp" />
@@ -202,7 +188,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginEnd="15dp"
                 android:text="Albums"
                 android:textSize="18dp" />
@@ -217,7 +203,8 @@
                 android:id="@+id/artist_album_list_rv"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="10dp" />
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="20dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
