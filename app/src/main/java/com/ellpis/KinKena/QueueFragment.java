@@ -1,7 +1,6 @@
 package com.ellpis.KinKena;
 
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,6 @@ import com.ellpis.KinKena.Adapters.SongAdapter;
 import com.ellpis.KinKena.Objects.Song;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -64,7 +62,7 @@ public class QueueFragment extends Fragment implements SongAdapter.ItemClickList
     }
 
     @Override
-    public void onItemClick(View view, int position) {
+    public void onSongItemClick(View view, int position) {
         //TODO: NOT YET IMPLEMENTED
         //MainActivity.playSongInQueue(position);
     }

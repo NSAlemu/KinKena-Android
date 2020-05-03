@@ -49,7 +49,7 @@ public class PlaylistTabAdapter extends RecyclerView.Adapter<PlaylistTabAdapter.
         @Override
         public void onClick(View v) {
             if (mClickListener != null)
-                mClickListener.onItemClick(v, getAdapterPosition());
+                mClickListener.onPlaylistItemClick(v, getAdapterPosition());
         }
 
         @Override
@@ -101,9 +101,11 @@ public class PlaylistTabAdapter extends RecyclerView.Adapter<PlaylistTabAdapter.
 
         if(playlists.get(i).isFromFirebase()){
             Picasso.get().load("https://firebasestorage.googleapis.com"  + playlists.get(i).getThumbnail())
+                    .placeholder(R.drawable.ic_library_music_black_24dp)
                     .into(viewHolder.songCoverImage);
         }else{
             Picasso.get().load("http://www.arifzefen.com" + playlists.get(i).getThumbnail())
+                    .placeholder(R.drawable.ic_library_music_black_24dp)
                     .into(viewHolder.songCoverImage);
         }
 
@@ -159,7 +161,7 @@ public class PlaylistTabAdapter extends RecyclerView.Adapter<PlaylistTabAdapter.
 
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
-        void onItemClick(View view, int position);
+        void onPlaylistItemClick(View view, int position);
     }
 
     public interface ItemLongClickListener {

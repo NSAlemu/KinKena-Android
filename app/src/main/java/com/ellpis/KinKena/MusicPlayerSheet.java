@@ -1,17 +1,23 @@
 package com.ellpis.KinKena;
 
-import android.app.Notification;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +32,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.media.session.MediaButtonReceiver;
 import androidx.palette.graphics.Palette;
 
 import com.ellpis.KinKena.Objects.Song;
@@ -35,6 +42,7 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -56,6 +64,7 @@ import java.util.Collections;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.content.ContentValues.TAG;
 import static com.google.android.exoplayer2.Player.REPEAT_MODE_ALL;
 import static com.google.android.exoplayer2.Player.REPEAT_MODE_OFF;
 import static com.google.android.exoplayer2.Player.REPEAT_MODE_ONE;
@@ -110,14 +119,12 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     private boolean shuffled;
     static ArrayList<Song> queue;
     static Bitmap bitmap;
-    static Notification notification;
-    static MediaSessionCompat.Callback mMediaSessionCallback;
     String ArifzefenSongPath = "http://www.arifzefen.com/json/playSong.php?id=";
     DefaultTrackSelector trackSelector;
-    //    private MediaSessionCompat mMediaSession;
-    PlaybackStateCompat.Builder mStateBuilder;
-    static MediaSessionConnector mediaSessionConnector;
-    float volume;
+    private MediaReceiver mediaReceiver;
+    public static MediaSessionConnector mediaSessionConnector;
+    private static int headSetHookClicks;
+    private AudioManager audioManager;
 
 
     public static MusicPlayerSheet newInstance(int currentWindow, ArrayList<Song> playlist, boolean shuffled) {
@@ -166,7 +173,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
                     public void onGenerated(Palette p) {
                         playerBackground.setBackgroundColor(Utility.manipulateColor(p.getDominantColor(getResources().getColor(R.color.on_top_background)), 0.6f));
                         miniPlayerBackground.setBackgroundColor(Utility.manipulateColor(p.getDominantColor(getResources().getColor(R.color.on_top_background)), 0.6f));
-
+                        MusicPlayerSheet.bitmap = bitmap;
                     }
                 });
 
@@ -174,7 +181,6 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
 
             @Override
             public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                setViews(queue.get(ForegroundService.player.getCurrentWindowIndex()));
             }
 
             @Override
@@ -209,7 +215,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
                     HttpDataSource dataSource =
                             new DefaultHttpDataSource("exoplayer-codelab");
                     // Set a custom authentication request header.
-                    dataSource.setRequestProperty("Cookies", "_ga=GA1.2.436202454.1587347535; _gid=GA1.2.921082897.1587347535; _ga=GA1.2.1355987553.1587348657; _gid=GA1.2.1039899393.1587847357; _gat=1");
+                    dataSource.setRequestProperty("Cookies", MainActivity.arifzefenCookie);
                     dataSource.setRequestProperty("Referer", "http://www.arifzefen.com/");
                     return dataSource;
 
@@ -229,43 +235,44 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         ForegroundService.player.setPlayWhenReady(playWhenReady);
         ForegroundService.player.seekTo(currentWindow, playbackPosition);
         ForegroundService.player.prepare(concatenatingMediaSource, false, false);
-
+        ForegroundService.player.setAudioAttributes(audioFocus(), true);
         ForegroundService.player.setWakeMode(C.WAKE_MODE_NETWORK);
-
+        setViews(queue.get(ForegroundService.player.getCurrentWindowIndex()));
+        mediaSession(queue.get(ForegroundService.player.getCurrentWindowIndex()));
         setupSeek();
         playpauseControl.setImageDrawable(getActivity().getDrawable(R.drawable.exo_controls_pause));
         miniPlaypause.setImageDrawable(getActivity().getDrawable(R.drawable.exo_controls_pause));
         ForegroundService.player.addListener(this);
         setupControls();
-        mMediaSessionCallback = setupMediaSessionCallback();
-        setViews(queue.get(ForegroundService.player.getCurrentWindowIndex()));
+
         sendMediaStyleNotification();
         setRepeatMode();
         setShuffleMode();
-
+        noiseControl();
     }
 
-    MediaSessionCompat.Callback setupMediaSessionCallback() {
-        return new MediaSessionCompat.Callback() {
-            @Override
-            public void onPause() {
-                playpauseControl.performClick();
-                super.onPause();
-            }
 
-            @Override
-            public void onSkipToNext() {
-                nextControl.performClick();
-                super.onSkipToNext();
-            }
+    private void mediaSession(Song song) {
 
-            @Override
-            public void onSkipToPrevious() {
-                previousControl.performClick();
-                super.onSkipToPrevious();
-            }
-        };
+        PlaybackStateCompat playbackStateCompat = new PlaybackStateCompat.Builder()
+                .setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
+                .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1, SystemClock.elapsedRealtime())
+                .build();
+        ComponentName mediaButtonReceiver = new ComponentName(getActivity(), MediaButtonReceiver.class);
+        MediaSessionCompat mMediaSession = new MediaSessionCompat(getActivity(), "MyMediasession", mediaButtonReceiver, null);
+        mMediaSession.setPlaybackState(playbackStateCompat);
+        mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mMediaSession.setActive(true);
+        mediaSessionConnector = new MediaSessionConnector(mMediaSession);
+        mediaSessionConnector.setPlayer(ForegroundService.player);
+        mediaSessionConnector.setMediaMetadataProvider(player -> new MediaMetadataCompat.Builder()
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, queue.get(player.getCurrentWindowIndex()).getSongName())
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, queue.get(player.getCurrentWindowIndex()).getArtistName())
+                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MusicPlayerSheet.bitmap)
+                .build());
+        mediaSessionConnector.setMediaButtonEventHandler(setupMediaControls());
     }
+
 
     @Override
     public void onDestroy() {
@@ -273,6 +280,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         Intent serviceIntent = new Intent(getContext(), ForegroundService.class);
         getContext().stopService(serviceIntent);
         releasePlayer();
+        getActivity().unregisterReceiver(mediaReceiver);
     }
 
     @Override
@@ -442,6 +450,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     }
 
     private void setRepeatMode() {
+        setPreviousNextControl();
         switch (ForegroundService.player.getRepeatMode()) {
             case REPEAT_MODE_OFF:
                 repeatControl.setImageDrawable(getActivity().getDrawable(R.drawable.exo_controls_repeat_off));
@@ -456,20 +465,73 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
 
     }
 
-    private void setShuffleMode() {
-        if (ForegroundService.player.getShuffleModeEnabled()) {
-            shuffleControl.setImageDrawable(getActivity().getDrawable(R.drawable.exo_controls_shuffle_off));
-
+    private void setPreviousNextControl() {
+        if (ForegroundService.player.hasNext()) {
+            nextControl.setAlpha(1f);
         } else {
-            shuffleControl.setImageDrawable(getActivity().getDrawable(R.drawable.exo_controls_shuffle_on));
+            nextControl.setAlpha(0.3f);
+        }
+        if (ForegroundService.player.hasPrevious()) {
+            previousControl.setAlpha(1f);
+        } else {
+            previousControl.setAlpha(0.3f);
         }
     }
 
+    private void setShuffleMode() {
+        setPreviousNextControl();
+        if (ForegroundService.player.getShuffleModeEnabled()) {
+            shuffleControl.setAlpha(1f);
+
+        } else {
+            shuffleControl.setAlpha(0.3f);
+        }
+    }
+
+    private MediaSessionConnector.MediaButtonEventHandler setupMediaControls() {
+
+        return (player, controlDispatcher, mediaButtonEvent) -> {
+            KeyEvent keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+            if (keyEvent == null || keyEvent.getAction() != KeyEvent.ACTION_DOWN) {
+                return false;
+            }
+            int keyCode = keyEvent.getKeyCode();
+            Log.e("keycode", keyCode + "");
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_MEDIA_NEXT:
+                    nextControl.performClick();
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+
+                    previousControl.performClick();
+                    break;
+                case KeyEvent.KEYCODE_HEADSETHOOK:
+                    headSetHookClicks++;
+                    Handler handler = new Handler();
+                    Runnable r = () -> {
+                        if (headSetHookClicks == 2) {
+                            nextControl.performClick();
+                        }
+                        headSetHookClicks = 0;
+                    };
+                    if (headSetHookClicks == 1) {
+                        handler.postDelayed(r, 500);
+                    }
+                    break;
+                default:
+                    // If another key is pressed within double tap timeout, consider the pending
+                    // pending play/pause as a single tap to handle media keys in order.
+                    break;
+            }
+            return false;
+        };
+    }
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
         String stateString;
         setPlayPause(!ForegroundService.player.getPlayWhenReady());
+        Log.e(TAG, "onPlayerStateChanged: "+playbackState );
         switch (playbackState) {
             case ExoPlayer.STATE_IDLE:
                 Log.d("Tag", "onPlayerStateChanged: ");
@@ -490,10 +552,24 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         }
     }
 
+    private AudioAttributes audioFocus() {
+        return new AudioAttributes.Builder()
+                .setUsage(C.USAGE_MEDIA)
+                .setContentType(C.CONTENT_TYPE_MOVIE)
+                .build();
+
+    }
+
+    private void noiseControl() {
+        IntentFilter filter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        mediaReceiver = new MediaReceiver();
+        getActivity().registerReceiver(mediaReceiver, filter);
+    }
+
     @Override
     public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+        setPreviousNextControl();
         setViews(queue.get(ForegroundService.player.getCurrentWindowIndex()));
-
     }
 
     @Override
@@ -517,5 +593,19 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
 
     }
 
+    class MediaReceiver extends BroadcastReceiver {
+
+
+        @Override
+        public void onReceive(final Context context, Intent intent) {
+            if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
+                if (ForegroundService.player != null && ForegroundService.player.isPlaying()) {
+                    ForegroundService.player.setPlayWhenReady(false);
+                }
+            }
+
+
+        }
+    }
 
 }

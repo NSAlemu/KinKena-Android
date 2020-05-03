@@ -2,7 +2,7 @@
 <resources>03DAC5
     <color name="colorPrimary">#593E6C</color>
     <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#6200EE</color>
+    <color name="colorAccent">#593E6C</color>
     <color name="Transparent">#00000000</color>
     <color name="White">#FFFFFF</color>
     <color name="background">#191A20</color>

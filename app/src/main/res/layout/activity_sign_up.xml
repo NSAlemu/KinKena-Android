@@ -6,147 +6,168 @@
     android:layout_height="match_parent"
     android:background="@color/background"
     tools:context=".SignUp">
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardView5"
-        android:layout_width="match_parent"
+
+    <ProgressBar
+        android:id="@+id/progressBar2"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="100dp"
-        android:layout_marginEnd="16dp"
-        app:cardBackgroundColor="@color/Transparent"
-        app:cardCornerRadius="0dp"
+        android:layout_marginTop="150dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/signup_container" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/signup_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background"
+        android:elevation="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardView5"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            app:cardBackgroundColor="@color/Transparent"
+            app:cardCornerRadius="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/outlinedUsernameField"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:hint="Username"
-                android:textColor="@color/background"
-                android:textColorHint="@color/selectedItem"
-                app:boxBackgroundColor="@color/OffWhite"
-                app:boxStrokeColor="@color/background"
-                app:hintTextColor="@color/selectedItem"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:layout_height="match_parent">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/signup_username"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/outlinedUsernameField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/White"
-                    android:inputType="text" />
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:hint="Username"
+                    android:textColor="@color/background"
+                    android:textColorHint="@color/selectedItem"
+                    app:boxBackgroundColor="@color/OffWhite"
+                    app:boxStrokeColor="@color/background"
+                    app:hintTextColor="@color/selectedItem"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/signup_username"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/White"
+                        android:inputType="text" />
+
+                </com.google.android.material.textfield.TextInputLayout>
 
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/outlinedEmailField"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:hint="Email"
-                android:textColor="@color/background"
-                android:textColorHint="@color/selectedItem"
-                app:boxBackgroundColor="@color/OffWhite"
-                app:boxStrokeColor="@color/background"
-                app:hintTextColor="@color/selectedItem"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/outlinedUsernameField">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/signup_email"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/outlinedEmailField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/White"
-                    android:inputType="textWebEmailAddress" />
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:hint="Email"
+                    android:textColor="@color/background"
+                    android:textColorHint="@color/selectedItem"
+                    app:boxBackgroundColor="@color/OffWhite"
+                    app:boxStrokeColor="@color/background"
+                    app:hintTextColor="@color/selectedItem"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/outlinedUsernameField">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/signup_email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/White"
+                        android:inputType="textWebEmailAddress" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/outlinedPasswordField"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:hint="Password"
-                android:textColor="@color/background"
-                android:textColorHint="@color/selectedItem"
-                app:boxBackgroundColor="@color/OffWhite"
-                app:boxStrokeColor="@color/background"
-                app:hintTextColor="@color/selectedItem"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/outlinedEmailField">
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/signup_password"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/outlinedPasswordField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/White"
-                    android:inputType="textPassword" />
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:hint="Password"
+                    android:textColor="@color/background"
+                    android:textColorHint="@color/selectedItem"
+                    app:boxBackgroundColor="@color/OffWhite"
+                    app:boxStrokeColor="@color/background"
+                    app:hintTextColor="@color/selectedItem"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/outlinedEmailField">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/signup_password"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/White"
+                        android:inputType="textPassword" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/outlinedconfPasswordField"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:hint="Confirm Password"
-                android:textColor="@color/background"
-                android:textColorHint="@color/selectedItem"
-                app:boxBackgroundColor="@color/OffWhite"
-                app:boxStrokeColor="@color/background"
-                app:hintTextColor="@color/selectedItem"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/outlinedPasswordField">
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/signup_conf_password"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/outlinedconfPasswordField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/White"
-                    android:inputType="textPassword" />
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:hint="Confirm Password"
+                    android:textColor="@color/background"
+                    android:textColorHint="@color/selectedItem"
+                    app:boxBackgroundColor="@color/OffWhite"
+                    app:boxStrokeColor="@color/background"
+                    app:hintTextColor="@color/selectedItem"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/outlinedPasswordField">
 
-            </com.google.android.material.textfield.TextInputLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/signup_conf_password"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/White"
+                        android:inputType="textPassword" />
 
-    </androidx.cardview.widget.CardView>
+                </com.google.android.material.textfield.TextInputLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/launch_log_in"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:backgroundTint="@color/OffWhite"
-        android:fontFamily="@font/montserrat_bold"
-        android:minHeight="55dp"
-        android:onClick="signUp"
-        android:text="Sign  Up"
-        android:textAllCaps="false"
-        android:textColor="@color/background"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="@+id/cardView5"
-        app:layout_constraintTop_toBottomOf="@+id/cardView5" />
+        </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/launch_log_in"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:backgroundTint="@color/OffWhite"
+            android:fontFamily="@font/montserrat_bold"
+            android:minHeight="55dp"
+            android:onClick="signUp"
+            android:text="Sign  Up"
+            android:textAllCaps="false"
+            android:textColor="@color/background"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cardView5" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

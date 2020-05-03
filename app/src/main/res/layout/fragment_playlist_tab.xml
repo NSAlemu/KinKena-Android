@@ -23,13 +23,12 @@
                 android:layout_height="wrap_content">
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
                     app:cardBackgroundColor="@color/colorPrimary"
                     app:cardCornerRadius="6dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/playlist_tab_title2">
@@ -38,7 +37,7 @@
                         android:id="@+id/playlist_tab_create_playlist"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@color/colorPrimary"
+                        android:background="@drawable/button_selected"
                         android:minWidth="200dp"
                         android:minHeight="50dp"
                         android:text="Create Playlist"
@@ -51,30 +50,55 @@
                     android:id="@+id/playlist_tab_title2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:elevation="10dp"
                     android:fontFamily="@font/montserrat_bold"
                     android:paddingStart="16dp"
                     android:paddingTop="15dp"
                     android:paddingBottom="10dp"
-                    android:text="PLAYLIST"
+                    android:text="PLAYLISTS"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                <ImageButton
+                    android:id="@+id/playlist_tab_setting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginBottom="8dp"
+                    android:adjustViewBounds="true"
+                    android:backgroundTint="@color/Transparent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_setting"
+                    app:layout_constraintBottom_toBottomOf="@+id/playlist_tab_title2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-                android:id="@+id/playlist_tab_SwipeRefreshLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/playlist_tab_rv"
+                <TextView
+                    android:id="@+id/playlist_tab_empty_notifier"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginEnd="24dp"
+                    android:gravity="center|start"
+                    android:minHeight="100dp"
+                    android:text="So empty in here! A few playlists would be nice."
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/cardView6" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/playlist_tab_rv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

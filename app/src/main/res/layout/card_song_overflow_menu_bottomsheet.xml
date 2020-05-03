@@ -110,7 +110,7 @@
                         android:paddingBottom="10dp">
 
                         <ImageView
-                            android:id="@+id/imageView6"
+                            android:id="@+id/imageView8"
                             android:layout_width="25dp"
                             android:layout_height="wrap_content"
                             android:layout_margin="10dp"
@@ -161,7 +161,7 @@
                         android:visibility="gone">
 
                         <ImageView
-                            android:id="@+id/imageView8"
+                            android:id="@+id/imageView9"
                             android:layout_width="25dp"
                             android:layout_height="wrap_content"
                             android:layout_margin="10dp"

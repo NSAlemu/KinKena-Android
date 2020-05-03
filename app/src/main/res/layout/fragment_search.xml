@@ -15,7 +15,8 @@
         <TextView
             android:id="@+id/search_tab_title"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="1dp"
+            android:elevation="10dp"
             android:fontFamily="@font/montserrat_bold"
             android:paddingStart="16dp"
             android:paddingTop="15dp"
@@ -29,30 +30,88 @@
             android:id="@+id/cardView3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            app:cardCornerRadius="30dp"
+            app:cardCornerRadius="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/search_tab_title">
 
-            <SearchView
-                android:id="@+id/search_searchview"
-                style="@style/AppSearchView"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:background="@color/OffWhite"
-                android:iconifiedByDefault="false"
-                android:minHeight="10dp"
-                android:queryHint="Search for Songs, Artists, Albums,..." />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <SearchView
+                    android:id="@+id/search_searchview"
+                    style="@style/AppSearchView"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:background="@color/OffWhite"
+                    android:iconifiedByDefault="false"
+                    android:minHeight="10dp"
+                    android:queryHint="Search for Songs, Artists, Playlists,..." />
+
+                <RadioGroup
+                    android:id="@+id/search_radioGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@color/selectedItem"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <RadioButton
+                        android:id="@+id/search_toggleButton_Songs"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@color/colorPrimary"
+                        android:button="@drawable/button_selected"
+                        android:gravity="center"
+                        android:text="Songs"
+                        android:textColor="@color/White" />
+
+                    <RadioButton
+                        android:id="@+id/search_toggleButton_Artists"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@color/selectedItem"
+                        android:button="@android:color/transparent"
+                        android:gravity="center"
+                        android:text="Artists"
+                        android:textColor="@color/White" />
+
+                    <RadioButton
+                        android:id="@+id/search_toggleButton_playlists"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@color/selectedItem"
+                        android:button="@android:color/transparent"
+                        android:gravity="center"
+                        android:text="Playlists"
+                        android:textColor="@color/White" />
+
+                    <RadioButton
+                        android:id="@+id/search_toggleButton_profiles"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@color/selectedItem"
+                        android:button="@android:color/transparent"
+                        android:gravity="center"
+                        android:text="Profiles"
+                        android:textColor="@color/White" />
+                </RadioGroup>
+            </LinearLayout>
+
         </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/search_recent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:text="Recent Searches"
             android:textSize="16sp"
@@ -61,11 +120,54 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/cardView3" />
 
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="No Results"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/search_recent" />
+
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/search_rv"
+            android:id="@+id/search_songs_rv"
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_height="wrap_content"
+            android:background="@color/background"
+            android:elevation="10dp"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/search_recent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_artists_rv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/background"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/search_recent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_playlist_rv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/background"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/search_recent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_profiles_rv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/background"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/search_recent" />
@@ -74,7 +176,7 @@
             android:id="@+id/search_clear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="32dp"
+            android:layout_marginEnd="16dp"
             android:text="Clear"
             android:textColor="@android:color/holo_blue_light"
             app:layout_constraintBottom_toBottomOf="@+id/search_recent"

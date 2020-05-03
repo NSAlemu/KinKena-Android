@@ -26,6 +26,7 @@
                     android:id="@+id/card_song_menu_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:elevation="10dp"
                     android:fontFamily="@font/montserrat_bold"
                     android:paddingStart="16dp"
                     android:paddingTop="15dp"

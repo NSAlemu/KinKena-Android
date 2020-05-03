@@ -35,6 +35,7 @@ public class AddToPlaylistBottomSheet extends BottomSheetDialog implements Playl
     List<Playlist> playlist = new ArrayList<>();
     String currentUserID = FirebaseAuth.getInstance().getUid();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     public AddToPlaylistBottomSheet(@NonNull Context context, int theme, Activity parentActivity, Song song) {
         super(context, theme);
         this.parentActivity = parentActivity;
@@ -55,10 +56,12 @@ public class AddToPlaylistBottomSheet extends BottomSheetDialog implements Playl
         newPlaylist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Utility.createPlaylist(getContext(),song);
+                Utility.createPlaylist(getContext(), song);
+                AddToPlaylistBottomSheet.this.dismiss();
             }
         });
     }
+
     private void getPlaylist() {
 
         db.collection("Users").document(currentUserID).collection("Playlists")
@@ -69,7 +72,7 @@ public class AddToPlaylistBottomSheet extends BottomSheetDialog implements Playl
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 playlist.add(document.toObject(Playlist.class));
-                                adapter.notifyItemInserted(playlist.size()-1);
+                                adapter.notifyItemInserted(playlist.size() - 1);
                             }
                         } else {
 
@@ -80,12 +83,12 @@ public class AddToPlaylistBottomSheet extends BottomSheetDialog implements Playl
 
 
     @Override
-    public void onItemClick(View view, int position) {
-        Toast.makeText(getContext(),"Added to Playlist",Toast.LENGTH_LONG).show();
+    public void onPlaylistItemClick(View view, int position) {
+        Toast.makeText(getContext(), "Added to Playlist", Toast.LENGTH_LONG).show();
         Map<String, Object> updates = new HashMap<>();
         List<Song> songList = new ArrayList<>();
-        if( playlist.get(position).getSongs()!=null){
-           songList = playlist.get(position).getSongs();
+        if (playlist.get(position).getSongs() != null) {
+            songList = playlist.get(position).getSongs();
         }
         songList.add(song);
         updates.put("songs", songList);

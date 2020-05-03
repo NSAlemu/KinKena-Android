@@ -28,6 +28,7 @@ public class Playlist implements Serializable {
 
     private String ownerID;
     private String ownerUsername;
+    private boolean privacy;
     private boolean fromFirebase = true;
 
     public String getTitle() {
@@ -117,13 +118,26 @@ public class Playlist implements Serializable {
         this.id = id;
     }
 
+    public boolean isPrivate() {
+        return privacy;
+    }
+
+    public void setPrivate(boolean aPrivate) {
+        privacy = aPrivate;
+    }
+
     @Override
     public String toString() {
-        return "SearchResult{" +
-                "title='" + title + '\'' +
-                ", subtitle='" + subtitle + '\'' +
-                ", thumbnail='" + thumbnail + '\'' +
-                ", songs=" + songs +
+        return "Playlist{\n" +
+                "id='" + id + '\'' +
+                ",\n title='" + title + '\'' +
+                ",\n subtitle='" + subtitle + '\'' +
+                ",\n thumbnail='" + thumbnail + '\'' +
+                ",\n songs=" + songs +
+                ",\n ownerID='" + ownerID + '\'' +
+                ",\n ownerUsername='" + ownerUsername + '\'' +
+                ",\n privacy=" + privacy +
+                ",\n fromFirebase=" + fromFirebase +
                 '}';
     }
 }

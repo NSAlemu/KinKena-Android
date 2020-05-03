@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -16,13 +17,11 @@ import androidx.constraintlayout.widget.Guideline;
 import androidx.fragment.app.FragmentManager;
 
 import com.ellpis.KinKena.Objects.Song;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.ellpis.KinKena.Repository.UserRepository;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DecimalFormat;
@@ -42,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     public static MusicPlayerSheet musicPlayer;
     public static String username;
     String currentUserID = FirebaseAuth.getInstance().getUid();
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    static String arifzefenCookie="";
     static BottomSheetBehavior.BottomSheetCallback bottomSheetCallback;
 
 
@@ -94,14 +93,17 @@ public class MainActivity extends AppCompatActivity {
         manager = getSupportFragmentManager();
         findViewById(R.id.main_fragment_search_container).setVisibility(View.GONE);
         prepareUsername();
+        prepareCookie();
     }
+
+
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = getString(R.string.channel_name);
             String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel channel = new NotificationChannel(getString(R.string.channel_name), name, importance);
             channel.setDescription(description);
             // Register the channel with the system; you can't change the importance
@@ -110,8 +112,9 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
         }
     }
+
     public static void playSong(int playbackPosition, ArrayList<Song> playlist, boolean shuffled) {
-        if(playlist==null || playbackPosition>=playlist.size() || playlist.size()==0){
+        if (playlist == null || playbackPosition >= playlist.size() || playlist.size() == 0) {
             return;
         }
         context.findViewById(R.id.main_player_sheet_container).setVisibility(View.VISIBLE);
@@ -124,14 +127,16 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Not yet Implemented
+     *
      * @param song
      */
-    public static void addToQueue(Song song){
+    public static void addToQueue(Song song) {
         throw new UnsupportedOperationException();
     }
 
     /**
      * Not Yet implemented
+     *
      * @param position
      */
     public static void playSongInQueue(int position) {
@@ -174,14 +179,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void prepareUsername() {
-        db.collection("Users").document(currentUserID)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        username = task.getResult().get("username").toString();
-                    }
-                });
+        currentUserID = FirebaseAuth.getInstance().getUid();
+        UserRepository.getUser(currentUserID, task -> {
+            username = task.getResult().get("username").toString();
+
+        });
+    }
+    private void prepareCookie() {
+        FirebaseFirestore.getInstance().collection("Keys").document("arifzefenKeys").get().addOnCompleteListener(task->{
+            Log.e("TAG", "prepareCookie: "+task.getResult().getString("cookies") );
+            arifzefenCookie = task.getResult().getString("cookies");
+            Log.e("TAG", "prepareCookie: "+arifzefenCookie );
+        });
     }
 
     public void setVisibility() {
@@ -195,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (sheetBehavior != null && sheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        } else if(getSupportFragmentManager().getBackStackEntryCount()==0){
+        } else if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
             new MaterialAlertDialogBuilder(context)
                     .setTitle("You are about to leave the App")
                     .setPositiveButton("Leave", new DialogInterface.OnClickListener() {
@@ -213,8 +222,7 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .setBackground(getResources().getDrawable(R.drawable.dialog_backgound))
                     .show();
-        }
-        else {
+        } else {
             super.onBackPressed();
         }
 

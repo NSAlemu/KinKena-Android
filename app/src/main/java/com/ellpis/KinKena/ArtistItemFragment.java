@@ -195,7 +195,7 @@ public class ArtistItemFragment extends Fragment {
                     tempSongs.addAll(album.getSongs());
                 }
             if(tempSongs.size()>0){
-                MainActivity.playSong((new Random()).nextInt(tempSongs.size() - 1), tempSongs, true);
+                MainActivity.playSong((new Random()).nextInt(tempSongs.size()), tempSongs, true);
             }
 
         };

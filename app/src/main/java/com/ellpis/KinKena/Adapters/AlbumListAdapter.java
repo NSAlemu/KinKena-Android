@@ -125,7 +125,7 @@ public class AlbumListAdapter  extends RecyclerView.Adapter<AlbumListAdapter.Vie
         SongAdapter songAdapter = new SongAdapter(newSongList,callerFragment,null,null);
         songAdapter.setClickListener(new SongAdapter.ItemClickListener() {
             @Override
-            public void onItemClick(View view, int position) {
+            public void onSongItemClick(View view, int position) {
                 ArrayList<Song> newSongList = new ArrayList<>();
                 newSongList.addAll(albumList.get(i).getSongs());
                 MainActivity.playSong(position, newSongList, false);

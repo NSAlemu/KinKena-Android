@@ -8,14 +8,10 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
+import com.ellpis.KinKena.Repository.UserRepository;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -36,8 +32,6 @@ public class SignUp extends AppCompatActivity {
     @BindView(R.id.signup_conf_password)
     TextInputEditText confPassword;
     private String TAG="tag";
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private boolean isLoading=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,41 +43,27 @@ public class SignUp extends AppCompatActivity {
     }
 
     public void signUp(View view){
-        if(isLoading){
-            return;
-        }
-
         if(!validSignUPForm())
             return;
-        isLoading=true;
-        mAuth.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString())
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "createUserWithEmail:success");
-                                isLoading=false;
+        setLoading(true);
+        UserRepository.createUser(username.getText().toString().trim(),email.getText().toString(), password.getText().toString(), this, task->{
+            // Sign in success, update UI with the signed-in user's information
+            Log.d(TAG, "createUserWithEmail:success");
+            setLoading(false);
 
-                            Map<String, String> newUserMap = new HashMap<>();
-                            newUserMap.put("username", username.getText().toString());
-                            newUserMap.put("email", email.getText().toString());
-                            db.collection("Users").document(mAuth.getUid()).set(newUserMap);
-                            startActivity(new Intent(SignUp.this, MainActivity.class));
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(SignUp.this, "Authentication failed. "+task.getException(),
-                                    Toast.LENGTH_LONG).show();
-
-                        }
-                    }
-                }).addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                isLoading=false;
-            }
+            Map<String, String> newUserMap = new HashMap<>();
+            newUserMap.put("username", username.getText().toString());
+            newUserMap.put("email", email.getText().toString());
+            FirebaseFirestore.getInstance().collection("Users").document(FirebaseAuth.getInstance().getUid())
+                    .set(newUserMap)
+                    .addOnCompleteListener(task1 -> {
+                        Log.e(TAG, "signUp: "+task1.getResult() );
+            }).addOnFailureListener(e -> {
+                Log.e(TAG, "signUp: "+e.toString() );
+            });
+            startActivity(new Intent(SignUp.this, MainActivity.class));
         });
+
 
     }
 
@@ -112,7 +92,14 @@ public class SignUp extends AppCompatActivity {
         }
         return isValid;
     }
+    private void setLoading(boolean isLoading){
+        if(isLoading){
+            findViewById(R.id.signup_container).setVisibility(View.GONE);
+        }else{
+            findViewById(R.id.signup_container).setVisibility(View.VISIBLE);
+        }
 
+    }
     public static boolean isValidEmail(CharSequence target) {
         return (!TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches());
     }

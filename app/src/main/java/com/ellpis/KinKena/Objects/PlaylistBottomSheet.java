@@ -1,11 +1,7 @@
 package com.ellpis.KinKena.Objects;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -14,13 +10,11 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.ellpis.KinKena.R;
+import com.ellpis.KinKena.Repository.PlaylistRepository;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PlaylistBottomSheet extends BottomSheetDialog{
     ImageView cover;
@@ -29,6 +23,7 @@ public class PlaylistBottomSheet extends BottomSheetDialog{
     TextView renamePlaylist;
     TextView deletePlaylist;
     TextView changeCover;
+    TextView privacy;
 
     Fragment parentFragment;
     Playlist playlist;
@@ -56,13 +51,28 @@ public class PlaylistBottomSheet extends BottomSheetDialog{
         renamePlaylist =view.findViewById(R.id.card_playlist_menu_rename_playlist);
         deletePlaylist =view.findViewById(R.id.card_playlist_menu_delete_playlist);
         changeCover =view.findViewById(R.id.card_playlist_menu_change_cover);
+        privacy =view.findViewById(R.id.card_playlist_menu_private_playlist);
 
-        Picasso.get().load(playlist.getThumbnail()).into(cover);
+        if(playlist.isFromFirebase()){
+            Picasso.get().load("https://firebasestorage.googleapis.com"  +playlist.getThumbnail())
+                    .placeholder(R.drawable.ic_library_music_black_24dp)
+                    .into(cover);
+        }else{
+            Picasso.get().load("http://www.arifzefen.com" + playlist.getThumbnail())
+                    .placeholder(R.drawable.ic_library_music_black_24dp)
+                    .into(cover);
+        }
+        if(playlist.isPrivate()){
+            privacy.setText("Make Playlist Public");
+        }else{
+            privacy.setText("Make Playlist Private");
+        }
         title.setText(playlist.getTitle());
         createdBy.setText("By "+playlist.getOwnerUsername());
         renamePlaylist.setOnClickListener(renamePlaylistOnclick());
         deletePlaylist.setOnClickListener(deletePlaylistOnclick());
         changeCover.setOnClickListener(changeCoverOnclick());
+        privacy.setOnClickListener(privacyOnclick());
     }
 
 
@@ -80,40 +90,16 @@ public class PlaylistBottomSheet extends BottomSheetDialog{
     }
     private View.OnClickListener changeCoverOnclick(){
         return v -> {
-            getPickImageIntent();
+            Utility.getPickImageIntent(parentFragment);
             this.dismiss();
         };
     }
-    public  Intent getPickImageIntent() {
-        Intent chooserIntent = null;
-
-        List<Intent> intentList = new ArrayList<>();
-
-        Intent pickIntent = new Intent(Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        takePhotoIntent.putExtra("return-data", true);
-//        takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTempFile(context)));
-        intentList = addIntentsToList(parentFragment.getContext(), intentList, pickIntent);
-        intentList = addIntentsToList(parentFragment.getContext(), intentList, takePhotoIntent);
-
-        if (intentList.size() > 0) {
-            chooserIntent = Intent.createChooser(intentList.remove(intentList.size() - 1),
-                   "choose a Playlist cover Image");
-            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentList.toArray(new Parcelable[]{}));
-        }
-        parentFragment.startActivityForResult(chooserIntent, 0);
-        return chooserIntent;
+    private View.OnClickListener privacyOnclick(){
+        return v -> {
+            PlaylistRepository.setPrivacyPlaylist(playlist,parentFragment);
+            playlist.setPrivate(!playlist.isPrivate());
+            this.dismiss();
+        };
     }
 
-    private  List<Intent> addIntentsToList(Context context, List<Intent> list, Intent intent) {
-        List<ResolveInfo> resInfo = context.getPackageManager().queryIntentActivities(intent, 0);
-        for (ResolveInfo resolveInfo : resInfo) {
-            String packageName = resolveInfo.activityInfo.packageName;
-            Intent targetedIntent = new Intent(intent);
-            targetedIntent.setPackage(packageName);
-            list.add(targetedIntent);
-        }
-        return list;
-    }
 }

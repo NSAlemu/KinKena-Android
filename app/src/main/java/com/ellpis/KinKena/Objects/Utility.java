@@ -2,26 +2,28 @@ package com.ellpis.KinKena.Objects;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.widget.EditText;
+import android.os.Parcelable;
+import android.provider.MediaStore;
+import android.text.InputType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 
 import com.ellpis.KinKena.Adapters.PlaylistTabAdapter;
 import com.ellpis.KinKena.MainActivity;
 import com.ellpis.KinKena.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.ellpis.KinKena.Repository.PlaylistRepository;
+import com.ellpis.KinKena.Repository.UserRepository;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,37 +42,25 @@ public class Utility {
                 Math.min(b, 255));
     }
 
+    private interface onButtonClick{
+        void onclick();
+    }
     public static void createPlaylist(Context context, Song song) {
-
-        final EditText input = new EditText(context);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        lp.leftMargin = 50;
-        lp.rightMargin = 50;
-        lp.topMargin = 50;
-        input.setLayoutParams(lp);
-        input.setHint("Playlist Name");
-        input.setHintTextColor(context.getResources().getColor(R.color.White));
-        input.setBackgroundColor(context.getResources().getColor(R.color.OffWhite));
-        input.setTextColor(context.getResources().getColor(R.color.White));
-        ColorStateList colorStateList = ColorStateList.valueOf(context.getResources().getColor(R.color.selectedItem));
-        ViewCompat.setBackgroundTintList(input, colorStateList);
-        LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        LinearLayout linearLayout = new LinearLayout(context);
-        linearLayout.setLayoutParams(ll);
-        linearLayout.addView(input);
-        linearLayout.setBackgroundColor(context.getResources().getColor(R.color.Transparent));
+        TextInputLayout textInputLayout = textInputLayoutBuilder(context, "Playlist Name");
+        TextInputEditText textInputEditText = textInputBuilder(context, "");
+        textInputLayout.addView(textInputEditText);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context)
-                .setTitle("Create Playlist")
-                .setView(linearLayout)
+                .setTitle("Create playlist")
+                .setView(textInputLayout)
                 .setPositiveButton("Create", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        if (textInputEditText.getText().toString().trim().isEmpty()) {
+                            Toast.makeText(context, "Name cannot be empty", Toast.LENGTH_LONG).show();
+                            createPlaylist(context, song);
+                            return;
+                        }
                         String currentUserID = FirebaseAuth.getInstance().getUid();
-                        FirebaseFirestore db = FirebaseFirestore.getInstance();
                         Playlist playlist = new Playlist();
                         List<Song> songs = new ArrayList<>();
                         if (song != null) {
@@ -78,9 +68,11 @@ public class Utility {
                         }
                         playlist.setSongs(songs);
                         playlist.setOwnerID(currentUserID);
-                        playlist.setTitle(input.getText().toString().trim());
+                        playlist.setTitle(textInputEditText.getText().toString().trim());
                         playlist.setOwnerUsername(MainActivity.username);
-                        db.collection("Users").document(currentUserID).collection("Playlists").add(playlist);
+                        playlist.setPrivate(false);
+                        PlaylistRepository.createPlaylist(playlist,context);
+                        Toast.makeText(context,"Playlist Created",Toast.LENGTH_SHORT).show();
                     }
                 });
         builder.setBackground(context.getDrawable(R.drawable.dialog_backgound));
@@ -89,56 +81,35 @@ public class Utility {
 
     public static void createPlaylist(Context context, PlaylistTabAdapter adapter) {
 
-        final EditText input = new EditText(context);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        lp.leftMargin = 50;
-        lp.rightMargin = 50;
-        lp.topMargin = 50;
-        input.setLayoutParams(lp);
-        input.setHint("Playlist Name");
-        input.setBackgroundColor(context.getResources().getColor(R.color.selectedItem));
-        input.setTextColor(context.getResources().getColor(R.color.OffWhite));
-        ColorStateList colorStateList = ColorStateList.valueOf(context.getResources().getColor(R.color.selectedItem));
-        ViewCompat.setBackgroundTintList(input, colorStateList);
         LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setLayoutParams(ll);
-        linearLayout.addView(input);
-        linearLayout.setBackgroundColor(context.getResources().getColor(R.color.Transparent));
+        TextInputLayout textInputLayout = textInputLayoutBuilder(context, "Playlist Name");
+        TextInputEditText textInputEditText = textInputBuilder(context, "");
+        textInputLayout.addView(textInputEditText);
+        linearLayout.addView(textInputLayout);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context)
-                .setTitle("Create Playlist")
+                .setTitle("Create playlist")
                 .setView(linearLayout)
                 .setPositiveButton("Create", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        if (textInputEditText.getText().toString().trim().isEmpty()) {
+                            Toast.makeText(context, "Name cannot be empty", Toast.LENGTH_LONG).show();
+                            createPlaylist(context, adapter);
+                            return;
+                        }
                         String currentUserID = FirebaseAuth.getInstance().getUid();
-                        FirebaseFirestore db = FirebaseFirestore.getInstance();
                         Playlist playlist = new Playlist();
                         List<Song> songs = new ArrayList<>();
                         playlist.setSongs(songs);
-                        playlist.setTitle(input.getText().toString().trim());
+                        playlist.setTitle(textInputEditText.getText().toString().trim());
                         playlist.setOwnerID(currentUserID);
                         playlist.setOwnerUsername(MainActivity.username);
-                        db.collection("Users").document(currentUserID).collection("Playlists")
-                                .add(playlist).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentReference> task) {
-                                db.collection("Users").document(currentUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                        playlist.setSubtitle(task.getResult().get("username").toString());
-                                        adapter.add(playlist);
-                                    }
-                                });
-
-                            }
-                        });
-
-
+                        playlist.setPrivate(false);
+                        PlaylistRepository.createPlaylist(playlist,context);
                     }
                 });
         builder.setBackground(context.getDrawable(R.drawable.dialog_backgound));
@@ -146,29 +117,17 @@ public class Utility {
     }
 
 
-
     public static void renamePlaylist(Fragment fragment, Playlist playlist) {
 
-        final EditText input = new EditText(fragment.getContext());
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        lp.leftMargin = 50;
-        lp.rightMargin = 50;
-        lp.topMargin = 50;
-        input.setLayoutParams(lp);
-        input.setHint("Playlist Name");
-        input.setText(playlist.getTitle());
-        input.setBackgroundColor(fragment.getContext().getResources().getColor(R.color.selectedItem));
-        input.setTextColor(fragment.getContext().getResources().getColor(R.color.OffWhite));
-        ColorStateList colorStateList = ColorStateList.valueOf(fragment.getContext().getResources().getColor(R.color.selectedItem));
-        ViewCompat.setBackgroundTintList(input, colorStateList);
         LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
         LinearLayout linearLayout = new LinearLayout(fragment.getContext());
         linearLayout.setLayoutParams(ll);
-        linearLayout.addView(input);
+        TextInputLayout textInputLayout = textInputLayoutBuilder(fragment.getContext(), "New Name");
+        TextInputEditText textInputEditText = textInputBuilder(fragment.getContext(), "");
+        textInputLayout.addView(textInputEditText);
+        linearLayout.addView(textInputLayout);
         linearLayout.setBackgroundColor(fragment.getContext().getResources().getColor(R.color.Transparent));
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(fragment.getContext())
                 .setTitle("Rename Playlist")
@@ -176,28 +135,21 @@ public class Utility {
                 .setPositiveButton("Rename", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String currentUserID = FirebaseAuth.getInstance().getUid();
-                        FirebaseFirestore db = FirebaseFirestore.getInstance();
-                        db.collection("Users").document(currentUserID).collection("Playlists")
-                                .document(playlist.getId()).update("title",input.getText().toString().trim() );
-                        ((TextView) fragment.getView().findViewById(R.id.playlist_title)).setText(input.getText().toString());
+                        PlaylistRepository.renamePlaylist(textInputEditText.getText().toString().trim(), playlist, fragment);
                     }
                 });
         builder.setBackground(fragment.getContext().getDrawable(R.drawable.dialog_backgound));
         builder.show();
     }
+
     public static void deletePlaylist(Fragment fragment, Playlist playlist) {
 
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(fragment.getContext())
-                .setTitle("Are you sure you want to delete your playlist \""+playlist.getTitle()+"\"")
+                .setTitle("Are you sure you want to delete your playlist \"" + playlist.getTitle() + "\"")
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String currentUserID = FirebaseAuth.getInstance().getUid();
-                        FirebaseFirestore db = FirebaseFirestore.getInstance();
-                        db.collection("Users").document(currentUserID).collection("Playlists")
-                                .document(playlist.getId()).delete();
-                        fragment.getFragmentManager().popBackStackImmediate();
+                        PlaylistRepository.deletePlaylist(playlist.getId(),fragment.getContext(), () -> fragment.getFragmentManager().popBackStackImmediate());
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -205,7 +157,104 @@ public class Utility {
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 });
+        builder.setBackground(fragment.getContext().
+
+                getDrawable(R.drawable.dialog_backgound));
+        builder.show();
+    }
+
+    public static void changeUsername(Fragment fragment) {
+        LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        LinearLayout linearLayout = new LinearLayout(fragment.getContext());
+        linearLayout.setLayoutParams(ll);
+        TextInputLayout textInputLayout = textInputLayoutBuilder(fragment.getContext(), "New Username");
+        TextInputEditText textInputEditText = textInputBuilder(fragment.getContext(), MainActivity.username);
+        textInputLayout.addView(textInputEditText);
+        linearLayout.addView(textInputLayout);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(fragment.getContext())
+                .setTitle("Change Username\"")
+                .setView(linearLayout)
+                .setPositiveButton("Change", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        UserRepository.renameUsername(textInputEditText.getText().toString().trim(),fragment.getContext(), () -> {
+                            Toast.makeText(fragment.getContext(), "Name cannot be empty", Toast.LENGTH_LONG).show();
+                            if (textInputEditText.getText().toString().trim().isEmpty()) {
+                                changeUsername(fragment);
+                                return;
+                            }
+                            ((TextView) fragment.getView().findViewById(R.id.account_setting_username)).setText(textInputEditText.getText().toString().trim());
+                            MainActivity.username = textInputEditText.getText().toString().trim();
+                        });
+                    }
+                });
         builder.setBackground(fragment.getContext().getDrawable(R.drawable.dialog_backgound));
         builder.show();
+    }
+
+    private static TextInputLayout textInputLayoutBuilder(Context context, String hint) {
+        LinearLayout.LayoutParams tilLP = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        tilLP.leftMargin = 50;
+        tilLP.rightMargin = 50;
+        tilLP.topMargin = 50;
+        TextInputLayout textInputLayout = new TextInputLayout(context);
+        textInputLayout.setLayoutParams(tilLP);
+        textInputLayout.setDefaultHintTextColor(ColorStateList.valueOf(context.getResources().getColor(R.color.White)));
+        textInputLayout.setHintTextColor(ColorStateList.valueOf(context.getResources().getColor(R.color.OffWhite)));
+        textInputLayout.setBoxBackgroundColor(context.getResources().getColor(R.color.White));
+        textInputLayout.setBoxStrokeColor(context.getResources().getColor(R.color.White));
+        textInputLayout.setHint(hint);
+        return textInputLayout;
+    }
+
+    private static TextInputEditText textInputBuilder(Context context, String hint) {
+        TextInputEditText textInputEditText = new TextInputEditText(context);
+        LinearLayout.LayoutParams tilLP = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        textInputEditText.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.White)));
+        textInputEditText.setLayoutParams(tilLP);
+        textInputEditText.setTextColor(context.getResources().getColor(R.color.White));
+        textInputEditText.setText(hint);
+        textInputEditText.setInputType(InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+        return textInputEditText;
+    }
+
+
+    public static Intent getPickImageIntent(Fragment parentFragment) {
+        Intent chooserIntent = null;
+
+        List<Intent> intentList = new ArrayList<>();
+
+        Intent pickIntent = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        takePhotoIntent.putExtra("return-data", true);
+//        takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTempFile(context)));
+        intentList = addIntentsToList(parentFragment.getContext(), intentList, pickIntent);
+        intentList = addIntentsToList(parentFragment.getContext(), intentList, takePhotoIntent);
+
+        if (intentList.size() > 0) {
+            chooserIntent = Intent.createChooser(intentList.remove(intentList.size() - 1),
+                    "choose a Playlist cover Image");
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentList.toArray(new Parcelable[]{}));
+        }
+        parentFragment.startActivityForResult(chooserIntent, 0);
+        return chooserIntent;
+    }
+
+    private static List<Intent> addIntentsToList(Context context, List<Intent> list, Intent intent) {
+        List<ResolveInfo> resInfo = context.getPackageManager().queryIntentActivities(intent, 0);
+        for (ResolveInfo resolveInfo : resInfo) {
+            String packageName = resolveInfo.activityInfo.packageName;
+            Intent targetedIntent = new Intent(intent);
+            targetedIntent.setPackage(packageName);
+            list.add(targetedIntent);
+        }
+        return list;
     }
 }

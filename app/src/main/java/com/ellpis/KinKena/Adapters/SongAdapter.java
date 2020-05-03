@@ -67,7 +67,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         @Override
         public void onClick(View v) {
             if (mClickListener != null)
-                mClickListener.onItemClick(v, getAdapterPosition());
+                mClickListener.onSongItemClick(v, getAdapterPosition());
         }
 
         @Override
@@ -142,8 +142,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
     void showBottomSheet(ViewHolder viewHolder, int i) {
         View view = ((FragmentActivity) viewHolder.overflowMenu.getContext()).getLayoutInflater().inflate(R.layout.card_song_overflow_menu_bottomsheet, null);
 
-        ((TextView) view.findViewById(R.id.card_song_menu_artist)).setText(songList.get(i).getSongName());
-        ((TextView) view.findViewById(R.id.card_song_menu_title)).setText(songList.get(i).getArtistName());
+        ((TextView) view.findViewById(R.id.card_song_menu_title)).setText(songList.get(i).getSongName());
+        ((TextView) view.findViewById(R.id.card_song_menu_artist)).setText(songList.get(i).getArtistName());
         Picasso.get().load("http://www.arifzefen.com" + songList.get(i).getThumbnail())
                 .into(((ImageView) view.findViewById(R.id.card_song_menu_cover)));
 
@@ -189,7 +189,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
                 Toast.makeText(v.getContext(), "Song Removed", Toast.LENGTH_SHORT).show();
                 //docRef.update(updates).addOnCompleteListener(new OnCompleteListener<Void>() {
                 deleteSong(playlistId, i);
-                songList.remove(i);
                 SongAdapter.this.notifyItemRemoved(i);
                 menuDialog.dismiss();
             }
@@ -212,7 +211,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
     public void deleteSong(String playlistID, int i) {
         Map<String, Object> updates = new HashMap<>();
         songList.remove(i);
-        updates.put("songList", songList);
+        updates.put("songs", songList);
         db.collection("Users").document(currentUserID).collection("Playlists").document(playlistID).update(updates);
     }
 
@@ -255,7 +254,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
-        void onItemClick(View view, int position);
+        void onSongItemClick(View view, int position);
     }
 
     public interface ItemLongClickListener {

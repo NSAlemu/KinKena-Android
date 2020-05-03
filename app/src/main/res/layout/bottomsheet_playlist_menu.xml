@@ -109,7 +109,7 @@
                         android:paddingBottom="10dp">
 
                         <ImageView
-                            android:id="@+id/imageView6"
+                            android:id="@+id/imageView8"
                             android:layout_width="25dp"
                             android:layout_height="wrap_content"
                             android:layout_margin="10dp"
@@ -123,6 +123,31 @@
                             android:gravity="center|start"
                             android:paddingStart="15dp"
                             android:text="Remame Playlist"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp">
+
+                        <ImageView
+                            android:id="@+id/imageView6"
+                            android:layout_width="25dp"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="10dp"
+                            android:adjustViewBounds="true"
+                            app:srcCompat="@drawable/ic_privacy" />
+
+                        <TextView
+                            android:id="@+id/card_playlist_menu_private_playlist"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center|start"
+                            android:paddingStart="15dp"
+                            android:text="Make Playlist Public"
                             android:textSize="14sp" />
                     </LinearLayout>
 
@@ -159,7 +184,7 @@
                         android:paddingBottom="10dp">
 
                         <ImageView
-                            android:id="@+id/imageView8"
+                            android:id="@+id/imageView7"
                             android:layout_width="25dp"
                             android:layout_height="wrap_content"
                             android:layout_margin="10dp"

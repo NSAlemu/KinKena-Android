@@ -19,17 +19,17 @@ import com.ellpis.KinKena.Adapters.AlbumArtAdapter;
 import com.ellpis.KinKena.Adapters.AlbumArtHorizAdapter;
 import com.ellpis.KinKena.Objects.Featured;
 import com.ellpis.KinKena.Objects.Playlist;
+import com.ellpis.KinKena.Repository.BrowseRepository;
 import com.ellpis.KinKena.Retrofit.MusicRetrofit;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,54 +41,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListener, AlbumArtHorizAdapter.ItemClickListener {
     private final String BASE_URL = "http://www.arifzefen.com";
-    Random rand = new Random();
-
-
-    String[] featuredLinks = {"curated/dancenchifera",
-            "curated/ethiohip-hop",
-            "curated/ethiojazz",
-            "curated/oldies",
-            "curated/reggaefusion",
-            "curated/slowjamz",
-            "curated/tizita",
-            "curated/traditional",
-            "curated/weddingsongs",
-            "curated/workout"};
-    String[] popularLinks = {"list/mostrecent",
-            "list/mostliked",
-            "list/mostplayed"};
-    String[] genreLinks = {"list/orthodoxmezmur",
-            "list/protestantmezmur",
-            "list/menzuma",
-            "list/drama",
-            "list/audiobooks",
-            "list/instrumentals",
-            "list/other",
-            "list/azmarisounds",
-            "list/kids",
-            "list/amahric",
-            "list/english",
-            "list/guragegna",
-            "list/guragigna",
-            "list/haderegna",
-            "list/harari",
-            "list/instrumental",
-            "list/oromiffa",
-            "list/oromigna",
-            "list/sudanese",
-            "list/wolita"};
-    String[] topPicksLinks = {
-            "curated/dancenchifera",
-            "curated/ethiohip-hop",
-            "curated/ethiojazz",
-            "curated/oldies",
-            "curated/reggaefusion",
-            "curated/slowjamz",
-            "curated/tizita",
-            "curated/traditional",
-            "curated/weddingsongs",
-            "#curated/workout"};
-
     List<Featured> allPlaylists = new ArrayList<>();
 
     private Retrofit retrofit;
@@ -132,56 +84,59 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         getAllData();
-        linkMap.put("Featured", featuredLinks);
-        linkMap.put("popular", popularLinks);
-        linkMap.put("Genre", genreLinks);
-        linkMap.put("TopPicks", topPicksLinks);
-
-        for (Map.Entry<String, String[]> entry : linkMap.entrySet()) {
-            List<String> ArrayList = Arrays.asList(entry.getValue());
-            Collections.shuffle(ArrayList);
-            linkMap.put(entry.getKey(), (String[]) ArrayList.toArray());
-        }
-
-        featuredAdapter = new AlbumArtAdapter(featuredPlaylists);
-        featuredAdapter.setClickListener(this);
-        popularAdapter = new AlbumArtHorizAdapter(popularPlaylists);
-        popularAdapter.setClickListener(this);
-        GenreAdapter = new AlbumArtAdapter(GenrePlaylists);
-        GenreAdapter.setClickListener(this);
-        topPicksAdapter = new AlbumArtAdapter(topPicksPlaylists);
-        topPicksAdapter.setClickListener(this);
-
-        playlistMap.put("Featured", featuredPlaylists);
-        playlistMap.put("popular", popularPlaylists);
-        playlistMap.put("Genre", GenrePlaylists);
-        playlistMap.put("TopPicks", topPicksPlaylists);
-
-        adapterMap.put("Featured", featuredAdapter);
-        adapterMap.put("popular", popularAdapter);
-        adapterMap.put("Genre", GenreAdapter);
-        adapterMap.put("TopPicks", topPicksAdapter);
-
-        recyclerViewMap.put("Featured", featuredRv);
-        recyclerViewMap.put("popular", popularRv);
-        recyclerViewMap.put("Genre", genreRv);
-        recyclerViewMap.put("TopPicks", topPicksRv);
-        featuredAdapter = new AlbumArtAdapter(featuredPlaylists);
-        featuredAdapter.setClickListener(this);
 
 
-
-        for (Map.Entry<String, RecyclerView> entry : recyclerViewMap.entrySet()) {
-            if (entry.getKey().equals("popular")) {
-                setupRecyclerview(LinearLayoutManager.VERTICAL, entry.getValue(), entry.getKey());
-                loadData(entry.getKey(), 0);
-            } else {
-                setupRecyclerview(LinearLayoutManager.HORIZONTAL, entry.getValue(), entry.getKey());
-                loadData(entry.getKey(), 0);
+        BrowseRepository.getBrowseLinks(task -> {
+            for (DocumentSnapshot document : task.getResult().getDocuments()) {
+                List<String> links = ((List<String>) document.get("links"));
+                Collections.shuffle(links);
+                linkMap.put(document.getString("title"), links.toArray(new String[0]));
             }
+            featuredAdapter = new AlbumArtAdapter(featuredPlaylists);
+            featuredAdapter.setClickListener(this);
+            popularAdapter = new AlbumArtHorizAdapter(popularPlaylists);
+            popularAdapter.setClickListener(this);
+            GenreAdapter = new AlbumArtAdapter(GenrePlaylists);
+            GenreAdapter.setClickListener(this);
+            topPicksAdapter = new AlbumArtAdapter(topPicksPlaylists);
+            topPicksAdapter.setClickListener(this);
 
-        }
-        morePlaylistsBtn.setOnClickListener(loadMorePlaylist());
+            playlistMap.put("Featured", featuredPlaylists);
+            playlistMap.put("popular", popularPlaylists);
+            playlistMap.put("Genre", GenrePlaylists);
+            playlistMap.put("TopPicks", topPicksPlaylists);
+
+            adapterMap.put("Featured", featuredAdapter);
+            adapterMap.put("popular", popularAdapter);
+            adapterMap.put("Genre", GenreAdapter);
+            adapterMap.put("TopPicks", topPicksAdapter);
+
+            recyclerViewMap.put("Featured", featuredRv);
+            recyclerViewMap.put("popular", popularRv);
+            recyclerViewMap.put("Genre", genreRv);
+            recyclerViewMap.put("TopPicks", topPicksRv);
+            featuredAdapter = new AlbumArtAdapter(featuredPlaylists);
+            featuredAdapter.setClickListener(this);
+            for (Map.Entry<String, RecyclerView> entry : recyclerViewMap.entrySet()) {
+                if (entry.getKey().equals("popular")) {
+                    setupRecyclerview(LinearLayoutManager.VERTICAL, entry.getValue(), entry.getKey());
+                    loadData(entry.getKey(), 0);
+                } else {
+                    setupRecyclerview(LinearLayoutManager.HORIZONTAL, entry.getValue(), entry.getKey());
+                    loadData(entry.getKey(), 0);
+                }
+
+            }
+            morePlaylistsBtn.setOnClickListener(loadMorePlaylist());
+        });
+
+
+//        for (Map.Entry<String, String[]> entry : linkMap.entrySet()) {
+//            List<String> ArrayList = Arrays.asList(entry.getValue());
+//            Collections.shuffle(ArrayList);
+//            linkMap.put(entry.getKey(), (String[]) ArrayList.toArray());
+//        }
+
 
     }
 
@@ -251,9 +206,9 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
                             morePlaylistsAdapter = new AlbumArtAdapter(morePlaylists);
                             GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
                             morePlaylistsAdapter.setClickListener(Browse.this);
-                            for(int i=0; i<6 && i<allPlaylists.size();i++){
+                            for (int i = 0; i < 6 && i < allPlaylists.size(); i++) {
                                 Featured featured = allPlaylists.get(i);
-                                getData("featured",featured.getId()+"",morePlaylists, morePlaylistsAdapter);
+                                getData("featured", featured.getId() + "", morePlaylists, morePlaylistsAdapter);
                             }
 
                             morePlaylistsRv.setAdapter(morePlaylistsAdapter);
@@ -296,19 +251,21 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
             }
         }
     }
-    private View.OnClickListener loadMorePlaylist(){
+
+    private View.OnClickListener loadMorePlaylist() {
         return v -> {
-            int i=loadedPlaylists;
-            for(; i<loadedPlaylists+6 && i<allPlaylists.size();i++){
+            int i = loadedPlaylists;
+            for (; i < loadedPlaylists + 6 && i < allPlaylists.size(); i++) {
                 Featured featured = allPlaylists.get(i);
-                getData("featured",featured.getId()+"",morePlaylists, morePlaylistsAdapter);
+                getData("featured", featured.getId() + "", morePlaylists, morePlaylistsAdapter);
             }
-            loadedPlaylists=i;
-            if(loadedPlaylists>= allPlaylists.size()-1){
+            loadedPlaylists = i;
+            if (loadedPlaylists >= allPlaylists.size() - 1) {
                 morePlaylistsBtn.setVisibility(View.GONE);
             }
         };
     }
+
     class WrapContentLinearLayoutManager extends LinearLayoutManager {
 
         String key;
@@ -330,7 +287,8 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
 
     @Override
     public void onItemClick(View view, int position, Playlist result) {
-        getFragmentManager().beginTransaction().replace(getId(), PlaylistItemFragment.newInstance(result.getOwnerID(), result.isFromFirebase()))
+        Log.e("TAG", "onItemClick: " + result.toString());
+        getFragmentManager().beginTransaction().replace(getId(), PlaylistItemFragment.newInstance(result.getOwnerID(), result.getId(), result.isFromFirebase()))
                 .addToBackStack(null)
                 .commit();
     }
