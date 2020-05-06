@@ -7,7 +7,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -33,13 +32,11 @@ public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickL
 
     ImageView songCoverImage;
     TextView title;
-LinearLayout labelBackground;
 
     public ViewHolder(@NonNull View itemView) {
         super(itemView);
         songCoverImage = itemView.findViewById(R.id.card_abum_art_image);
         title = itemView.findViewById(R.id.card_abum_art_text);
-        labelBackground = itemView.findViewById(R.id.card_album_label_background);
 
 
         itemView.setOnClickListener(this);
@@ -98,7 +95,10 @@ LinearLayout labelBackground;
     @Override
     public void onBindViewHolder(@NonNull AlbumArtAdapter.ViewHolder viewHolder, int i) {
     try {
-        Picasso.get().load("http://www.arifzefen.com"+songList.get(i).getThumbnail()).into(viewHolder.songCoverImage);
+        Picasso.get().load("http://www.arifzefen.com"+songList.get(i).getThumbnail())
+                .placeholder(R.drawable.ic_logo)
+                .fit()
+                .into(viewHolder.songCoverImage);
 
     }catch (Exception e){
         Picasso.get().load(R.drawable.ic_library_music_black_24dp).into(viewHolder.songCoverImage);
@@ -112,8 +112,6 @@ LinearLayout labelBackground;
                 viewHolder.title.setText("");
             }
         }
-
-
     }
 
 

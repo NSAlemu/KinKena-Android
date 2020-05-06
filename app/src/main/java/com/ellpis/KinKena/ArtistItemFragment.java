@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,6 +28,7 @@ import com.google.gson.GsonBuilder;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -38,7 +40,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 
-public class ArtistItemFragment extends Fragment {
+public class ArtistItemFragment extends Fragment implements SongAdapter.ItemClickListener, SimpleCircleCoverAdapter.ItemClickListener {
     private final String BASE_URL = "http://www.arifzefen.com";
     @BindView(R.id.artist_title)
     TextView title;
@@ -89,10 +91,12 @@ public class ArtistItemFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+
         getData();
     }
 
     void getData() {
+
         Gson gson = new GsonBuilder()
                 .setLenient()
                 .create();
@@ -113,7 +117,11 @@ public class ArtistItemFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            if (getView() == null) {
+                                return;
+                            }
                             Artist artist = resBookSearch.body();
+                            Collections.reverse(artist.getAlbums());
                             artist.setSong_sArtistData();
                             initalizeViews(artist);
 
@@ -141,7 +149,9 @@ public class ArtistItemFragment extends Fragment {
         albumList.addAll(artist.getAlbums());
         Picasso.get().load(BASE_URL + artist.getThumbnail()).into(cover);
         topTrackAdapter = new SongAdapter(topTrackList, this, null, null);
+        topTrackAdapter.setClickListener(this);
         albumCoverAdapter = new SimpleCircleCoverAdapter(albumList);
+        albumCoverAdapter.setClickListener(this);
         albumListAdapter = new AlbumListAdapter(albumList, this);
 
         topTrackRv.setAdapter(topTrackAdapter);
@@ -190,14 +200,27 @@ public class ArtistItemFragment extends Fragment {
     private View.OnClickListener shuffleOnClickListener() {
         return v -> {
 
-                ArrayList<Song> tempSongs = new ArrayList<>();
-                for (Album album : albumList) {
-                    tempSongs.addAll(album.getSongs());
-                }
-            if(tempSongs.size()>0){
+            ArrayList<Song> tempSongs = new ArrayList<>();
+            for (Album album : albumList) {
+                tempSongs.addAll(album.getSongs());
+            }
+            if (tempSongs.size() > 0) {
                 MainActivity.playSong((new Random()).nextInt(tempSongs.size()), tempSongs, true);
             }
 
         };
+    }
+
+    @Override
+    public void onSongItemClick(View view, int position) {
+        MainActivity.playSong(position, (ArrayList<Song>) topTrackList, false);
+    }
+
+    @Override
+    public void onSimpleCoverItemClick(View view, int position) {
+        albumListRv.post(() -> {
+            float y = albumListRv.getY() + albumListRv.getChildAt(position).getY();
+            ((NestedScrollView) getView().findViewById(R.id.artist_item_nestedscrollview)).smoothScrollTo(0, (int) y);
+        });
     }
 }

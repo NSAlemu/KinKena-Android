@@ -70,8 +70,10 @@
                     android:layout_marginEnd="24dp"
                     android:layout_marginBottom="8dp"
                     android:adjustViewBounds="true"
+                    android:background="@color/Transparent"
                     android:backgroundTint="@color/Transparent"
-                    android:scaleType="centerCrop"
+                    android:cropToPadding="true"
+                    android:padding="10dp"
                     android:src="@drawable/ic_setting"
                     app:layout_constraintBottom_toBottomOf="@+id/playlist_tab_title2"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -93,10 +95,13 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/cardView6" />
             </androidx.constraintlayout.widget.ConstraintLayout>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/playlist_tab_rv"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:clipToPadding="true"
+                android:paddingBottom="100dp"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 

@@ -122,7 +122,7 @@
                             android:layout_height="match_parent"
                             android:gravity="center|start"
                             android:paddingStart="15dp"
-                            android:text="Remame Playlist"
+                            android:text="Rename Playlist"
                             android:textSize="14sp" />
                     </LinearLayout>
 

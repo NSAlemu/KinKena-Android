@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.ellpis.KinKena.Objects.Utility;
+import com.ellpis.KinKena.Repository.SearchRepository;
 import com.ellpis.KinKena.Repository.StorageRepository;
 import com.ellpis.KinKena.Repository.UserRepository;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -61,12 +62,13 @@ public class AccountSettings extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        // Inflate the layout for this fragment'
         return inflater.inflate(R.layout.fragment_account_settings, container, false);
     }
 
@@ -111,6 +113,8 @@ public class AccountSettings extends Fragment {
                     .setPositiveButton("Log Out", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            SearchRepository searchRepository = new SearchRepository(getActivity());
+                            searchRepository.clearSearchPref();
                             FirebaseAuth.getInstance().signOut();
                             getActivity().startActivity(new Intent(getContext(), LaunchPage.class));
                             getActivity().finish();

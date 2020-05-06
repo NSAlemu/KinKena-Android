@@ -62,7 +62,7 @@ public class PlaylistBottomSheet extends BottomSheetDialog{
                     .placeholder(R.drawable.ic_library_music_black_24dp)
                     .into(cover);
         }
-        if(playlist.isPrivate()){
+        if(playlist.isPrivacy()){
             privacy.setText("Make Playlist Public");
         }else{
             privacy.setText("Make Playlist Private");
@@ -96,8 +96,8 @@ public class PlaylistBottomSheet extends BottomSheetDialog{
     }
     private View.OnClickListener privacyOnclick(){
         return v -> {
-            PlaylistRepository.setPrivacyPlaylist(playlist,parentFragment);
-            playlist.setPrivate(!playlist.isPrivate());
+            PlaylistRepository.setPrivacyPlaylist(playlist.getId(), !playlist.isPrivacy(),parentFragment);
+            playlist.setPrivacy(!playlist.isPrivacy());
             this.dismiss();
         };
     }

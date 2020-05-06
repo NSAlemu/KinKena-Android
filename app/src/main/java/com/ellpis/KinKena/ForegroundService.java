@@ -56,7 +56,6 @@ public class ForegroundService extends Service {
         playerNotificationManager.setMediaSessionToken(MusicPlayerSheet.mediaSessionConnector.mediaSession.getSessionToken());
         playerNotificationManager.setSmallIcon(R.mipmap.ic_launcher);
         playerNotificationManager.setPlayer(player);
-
         Log.d("TAG", "onStartCommand: ");
         return START_NOT_STICKY;
     }
@@ -110,6 +109,9 @@ public class ForegroundService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopForeground(true);
+        playerNotificationManager.setPlayer(null);
+        stopSelf();
         Log.d("TAG", "onDestroy: ");
     }
 

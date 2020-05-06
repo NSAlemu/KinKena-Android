@@ -88,12 +88,15 @@ public class Artist {
 
     public void setSong_sArtistData(){
         for(Album album: getAlbums()){
+            String cover = album.getAlbumPurl().replaceFirst("icon","cover");
+            album.setAlbumPurl(cover);
             for(Song song: album.getSongs()){
                 song.setArtistId(this.artistId);
                 song.setAlbumName(album.getAlbumName());
                 song.setArtistName(this.artistName);
-                song.setThumbnail(album.getAlbumPurl());
+                song.setThumbnail(cover);
             }
         }
     }
+
 }

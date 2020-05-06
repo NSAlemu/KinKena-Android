@@ -60,12 +60,12 @@ public class PlaylistRepository {
 
     }
 
-    public static void setPrivacyPlaylist(Playlist playlist, Fragment fragment) {
+    public static void setPrivacyPlaylist(String playlistID, boolean newPrivacy, Fragment fragment) {
         String currentUserID = FirebaseAuth.getInstance().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Users").document(currentUserID).collection("Playlists")
-                .document(playlist.getId()).update("privacy", !playlist.isPrivate());
-        updatePrivacySearchPlaylistIndex(!playlist.isPrivate(), playlist.getId(), fragment.getContext());
+                .document(playlistID).update("privacy", newPrivacy);
+        updatePrivacySearchPlaylistIndex(newPrivacy, playlistID, fragment.getContext());
 
     }
 

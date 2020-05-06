@@ -1,6 +1,10 @@
 package com.ellpis.KinKena;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkRequest;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,12 +23,16 @@ import com.ellpis.KinKena.Adapters.AlbumArtAdapter;
 import com.ellpis.KinKena.Adapters.AlbumArtHorizAdapter;
 import com.ellpis.KinKena.Objects.Featured;
 import com.ellpis.KinKena.Objects.Playlist;
+import com.ellpis.KinKena.Objects.Utils;
 import com.ellpis.KinKena.Repository.BrowseRepository;
 import com.ellpis.KinKena.Retrofit.MusicRetrofit;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,6 +41,9 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.Cache;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -71,6 +82,8 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
     Map<String, RecyclerView.Adapter> adapterMap = new HashMap<>();
     Map<String, RecyclerView> recyclerViewMap = new HashMap<>();
     private int loadedPlaylists;
+    private OkHttpClient client;
+    boolean initializing = true;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -83,60 +96,63 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        File httpCacheDirectory = new File(getContext().getCacheDir(), "responses");
+        int cacheSize = 10 * 1024 * 1024; // 10 MiB
+        Cache cache = new Cache(httpCacheDirectory, cacheSize);
+        client = new OkHttpClient.Builder()
+                .addNetworkInterceptor(REWRITE_CACHE_CONTROL_INTERCEPTOR)
+                .cache(cache)
+                .build();
         getAllData();
-
-
+        morePlaylistsBtn.setOnClickListener(loadMorePlaylist());
         BrowseRepository.getBrowseLinks(task -> {
-            for (DocumentSnapshot document : task.getResult().getDocuments()) {
-                List<String> links = ((List<String>) document.get("links"));
-                Collections.shuffle(links);
-                linkMap.put(document.getString("title"), links.toArray(new String[0]));
-            }
-            featuredAdapter = new AlbumArtAdapter(featuredPlaylists);
-            featuredAdapter.setClickListener(this);
-            popularAdapter = new AlbumArtHorizAdapter(popularPlaylists);
-            popularAdapter.setClickListener(this);
-            GenreAdapter = new AlbumArtAdapter(GenrePlaylists);
-            GenreAdapter.setClickListener(this);
-            topPicksAdapter = new AlbumArtAdapter(topPicksPlaylists);
-            topPicksAdapter.setClickListener(this);
-
-            playlistMap.put("Featured", featuredPlaylists);
-            playlistMap.put("popular", popularPlaylists);
-            playlistMap.put("Genre", GenrePlaylists);
-            playlistMap.put("TopPicks", topPicksPlaylists);
-
-            adapterMap.put("Featured", featuredAdapter);
-            adapterMap.put("popular", popularAdapter);
-            adapterMap.put("Genre", GenreAdapter);
-            adapterMap.put("TopPicks", topPicksAdapter);
-
-            recyclerViewMap.put("Featured", featuredRv);
-            recyclerViewMap.put("popular", popularRv);
-            recyclerViewMap.put("Genre", genreRv);
-            recyclerViewMap.put("TopPicks", topPicksRv);
-            featuredAdapter = new AlbumArtAdapter(featuredPlaylists);
-            featuredAdapter.setClickListener(this);
-            for (Map.Entry<String, RecyclerView> entry : recyclerViewMap.entrySet()) {
-                if (entry.getKey().equals("popular")) {
-                    setupRecyclerview(LinearLayoutManager.VERTICAL, entry.getValue(), entry.getKey());
-                    loadData(entry.getKey(), 0);
-                } else {
-                    setupRecyclerview(LinearLayoutManager.HORIZONTAL, entry.getValue(), entry.getKey());
-                    loadData(entry.getKey(), 0);
-                }
-
-            }
-            morePlaylistsBtn.setOnClickListener(loadMorePlaylist());
+            setupViews(task);
         });
+        registerNetworkCallbackV23();
+    }
 
+    void setupViews(Task<QuerySnapshot> task) {
+        if (getView() == null) return;
+        for (DocumentSnapshot document : task.getResult().getDocuments()) {
+            List<String> links = ((List<String>) document.get("links"));
+            Collections.shuffle(links);
+            linkMap.put(document.getString("title"), links.toArray(new String[0]));
+        }
+        featuredAdapter = new AlbumArtAdapter(featuredPlaylists);
+        featuredAdapter.setClickListener(this);
+        popularAdapter = new AlbumArtHorizAdapter(popularPlaylists);
+        popularAdapter.setClickListener(this);
+        GenreAdapter = new AlbumArtAdapter(GenrePlaylists);
+        GenreAdapter.setClickListener(this);
+        topPicksAdapter = new AlbumArtAdapter(topPicksPlaylists);
+        topPicksAdapter.setClickListener(this);
 
-//        for (Map.Entry<String, String[]> entry : linkMap.entrySet()) {
-//            List<String> ArrayList = Arrays.asList(entry.getValue());
-//            Collections.shuffle(ArrayList);
-//            linkMap.put(entry.getKey(), (String[]) ArrayList.toArray());
-//        }
+        playlistMap.put("Featured", featuredPlaylists);
+        playlistMap.put("popular", popularPlaylists);
+        playlistMap.put("Genre", GenrePlaylists);
+        playlistMap.put("TopPicks", topPicksPlaylists);
 
+        adapterMap.put("Featured", featuredAdapter);
+        adapterMap.put("popular", popularAdapter);
+        adapterMap.put("Genre", GenreAdapter);
+        adapterMap.put("TopPicks", topPicksAdapter);
+
+        recyclerViewMap.put("Featured", featuredRv);
+        recyclerViewMap.put("popular", popularRv);
+        recyclerViewMap.put("Genre", genreRv);
+        recyclerViewMap.put("TopPicks", topPicksRv);
+        featuredAdapter = new AlbumArtAdapter(featuredPlaylists);
+        featuredAdapter.setClickListener(this);
+        for (Map.Entry<String, RecyclerView> entry : recyclerViewMap.entrySet()) {
+            if (entry.getKey().equals("popular")) {
+                setupRecyclerview(LinearLayoutManager.VERTICAL, entry.getValue(), entry.getKey());
+                loadData(entry.getKey(), 0);
+            } else {
+                setupRecyclerview(LinearLayoutManager.HORIZONTAL, entry.getValue(), entry.getKey());
+                loadData(entry.getKey(), 0);
+            }
+
+        }
 
     }
 
@@ -147,6 +163,7 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
         if (retrofit == null) {
             retrofit = new retrofit2.Retrofit.Builder()
                     .baseUrl(BASE_URL)
+                    .client(client)
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
         }
@@ -189,6 +206,7 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
         if (retrofit == null) {
             retrofit = new retrofit2.Retrofit.Builder()
                     .baseUrl(BASE_URL)
+                    .client(client)
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
         }
@@ -204,12 +222,9 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
                         public void run() {
                             allPlaylists.addAll(resBookSearch.body());
                             morePlaylistsAdapter = new AlbumArtAdapter(morePlaylists);
-                            GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+                            GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 3);
                             morePlaylistsAdapter.setClickListener(Browse.this);
-                            for (int i = 0; i < 6 && i < allPlaylists.size(); i++) {
-                                Featured featured = allPlaylists.get(i);
-                                getData("featured", featured.getId() + "", morePlaylists, morePlaylistsAdapter);
-                            }
+                            morePlaylistsBtn.performClick();
 
                             morePlaylistsRv.setAdapter(morePlaylistsAdapter);
                             morePlaylistsRv.setLayoutManager(gridLayoutManager);
@@ -255,7 +270,7 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
     private View.OnClickListener loadMorePlaylist() {
         return v -> {
             int i = loadedPlaylists;
-            for (; i < loadedPlaylists + 6 && i < allPlaylists.size(); i++) {
+            for (; i < loadedPlaylists + 12 && i < allPlaylists.size(); i++) {
                 Featured featured = allPlaylists.get(i);
                 getData("featured", featured.getId() + "", morePlaylists, morePlaylistsAdapter);
             }
@@ -291,5 +306,60 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
         getFragmentManager().beginTransaction().replace(getId(), PlaylistItemFragment.newInstance(result.getOwnerID(), result.getId(), result.isFromFirebase()))
                 .addToBackStack(null)
                 .commit();
+    }
+
+    private final Interceptor REWRITE_CACHE_CONTROL_INTERCEPTOR = chain -> {
+        okhttp3.Response originalResponse = chain.proceed(chain.request());
+        if (Utils.isNetworkConnected(getContext())) {
+            int maxAge = 60; // read from cache for 1 minute
+            return originalResponse.newBuilder()
+                    .header("Cache-Control", "public, max-age=" + maxAge)
+                    .build();
+        } else {
+            int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
+            return originalResponse.newBuilder()
+                    .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
+                    .build();
+        }
+    };
+
+    private void registerNetworkCallbackV23() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkRequest.Builder builder = new NetworkRequest.Builder();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            connectivityManager.registerDefaultNetworkCallback(
+                    new ConnectivityManager.NetworkCallback() {
+                        @Override
+                        public void onAvailable(Network network) {
+                            Browse.this.getActivity().runOnUiThread(() -> {
+                                if (!initializing) {
+                                    if (featuredPlaylists.isEmpty()) {
+                                        getAllData();
+                                        morePlaylistsBtn.setOnClickListener(loadMorePlaylist());
+                                        BrowseRepository.getBrowseLinks(task -> {
+                                            setupViews(task);
+                                        });
+                                    }
+                                }
+                                initializing = false;
+                            });
+
+                        }
+
+                        @Override
+                        public void onLost(Network network) {
+                            Browse.this.getActivity().runOnUiThread(() -> {
+
+                            });
+
+                        }
+
+                    }
+
+            );
+
+        }
+
     }
 }

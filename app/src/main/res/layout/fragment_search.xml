@@ -41,15 +41,19 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <SearchView
-                    android:id="@+id/search_searchview"
-                    style="@style/AppSearchView"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="45dp"
-                    android:background="@color/OffWhite"
-                    android:iconifiedByDefault="false"
-                    android:minHeight="10dp"
-                    android:queryHint="Search for Songs, Artists, Playlists,..." />
+                    android:layout_height="wrap_content"
+                    android:background="@color/White">
+
+                    <SearchView
+                        android:id="@+id/search_searchview"
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:iconifiedByDefault="false"
+                        android:minHeight="10dp"
+                        android:queryHint="Search for Songs, Artists, Playlists,..." />
+                </LinearLayout>
 
                 <RadioGroup
                     android:id="@+id/search_radioGroup"
@@ -136,7 +140,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@color/background"
-            android:elevation="10dp"
+            android:clipToPadding="false"
+            android:elevation="0dp"
+            android:paddingBottom="100dp"
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

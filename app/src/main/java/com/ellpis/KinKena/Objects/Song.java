@@ -19,7 +19,7 @@ public class Song implements Serializable, Parcelable {
     private Integer songId;
     @SerializedName("songName")
     private String songName;
-    @SerializedName("playtime")
+    @SerializedName(value = "playtime", alternate = "songPlaytime")
     private Integer playtime;
     @SerializedName("songLikes")
     private Integer songLikes;

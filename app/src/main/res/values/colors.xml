@@ -2,7 +2,7 @@
 <resources>03DAC5
     <color name="colorPrimary">#593E6C</color>
     <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#593E6C</color>
+    <color name="colorAccent">#8C706E6E</color>
     <color name="Transparent">#00000000</color>
     <color name="White">#FFFFFF</color>
     <color name="background">#191A20</color>
@@ -14,5 +14,6 @@
     <color name="playlist_label">#56593E6C</color>
     <color name="playlist_background">#328282B4</color>
     <color name="bottomsheet_background_color">#F72F2F33</color>
+    <color name="musicplayercontrolbackground">#292D2E33</color>
 
 </resources>

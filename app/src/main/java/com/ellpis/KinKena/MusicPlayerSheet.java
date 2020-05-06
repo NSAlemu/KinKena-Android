@@ -144,12 +144,14 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         queue = getArguments().getParcelableArrayList("playlist");
         shuffled = getArguments().getBoolean("shuffled");
         currentWindow = getArguments().getInt("currentWindow");
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
         return inflater.inflate(R.layout.fragment_music_player_sheet, container, false);
     }
 
@@ -456,7 +458,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
                 repeatControl.setImageDrawable(getActivity().getDrawable(R.drawable.exo_controls_repeat_off));
                 break;
             case REPEAT_MODE_ALL:
-                repeatControl.setImageDrawable(getActivity().getDrawable(R.drawable.exo_icon_repeat_all));
+                repeatControl.setImageDrawable(getActivity().getDrawable(R.drawable.exo_controls_repeat_all));
                 break;
             case REPEAT_MODE_ONE:
                 repeatControl.setImageDrawable(getActivity().getDrawable(R.drawable.exo_controls_repeat_one));

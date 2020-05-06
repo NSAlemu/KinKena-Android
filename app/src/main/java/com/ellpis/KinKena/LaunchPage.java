@@ -18,6 +18,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 
 import butterknife.BindView;
@@ -66,18 +68,30 @@ public class LaunchPage extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            setLoading(false);
+
                             startActivity(new Intent(LaunchPage.this, MainActivity.class));
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(LaunchPage.this, "Username & Password no found",
+                            setLoading(false);
+                            Toast.makeText(LaunchPage.this, "Username & Password don't match",
                                     Toast.LENGTH_SHORT).show();
                         }
 
                         // ...
                     }
-                });
+                }).addOnFailureListener(task->{
+            setLoading(false);
+            if(task instanceof FirebaseAuthInvalidCredentialsException || task instanceof FirebaseAuthInvalidUserException){
+                Toast.makeText(LaunchPage.this, "Sign in failed. Username and Password do not match",
+                        Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(LaunchPage.this, "Sign in failed. "+task.getLocalizedMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+
+
+        });
     }
 
     private void setLoading(boolean isLoading){

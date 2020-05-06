@@ -133,6 +133,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
             @Override
             public void onClick(View v) {
                 showBottomSheet(viewHolder, i);
+                if(callerFragment.getView().findViewById(R.id.search_searchview)!=null){
+                    callerFragment.getView().findViewById(R.id.search_searchview).clearFocus();
+                }
             }
         });
 

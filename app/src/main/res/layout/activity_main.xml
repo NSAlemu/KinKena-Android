@@ -16,26 +16,41 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0">
 
+        <TextView
+            android:id="@+id/main_notification_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:background="@color/selectedItem"
+            android:textColor="@color/White"
+            android:gravity="center"
+            android:text="Not Internet Connection"
+            android:visibility="gone"
+            android:padding="5dp">
+        </TextView>
+
         <fragment
             android:id="@+id/main_fragment_playlist_container"
             class="com.ellpis.KinKena.Playlist_tab"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:visibility="visible"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/main_bottom_nav_guideline"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/main_notification_bar" />
         <fragment
             android:id="@+id/main_fragment_search_container"
             class="com.ellpis.KinKena.SearchFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:visibility="visible"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/main_bottom_nav_guideline"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/main_notification_bar" />
 
         <fragment
             android:id="@+id/main_fragment_browse_container"
@@ -46,13 +61,13 @@
             app:layout_constraintBottom_toTopOf="@+id/main_bottom_nav_guideline"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/main_notification_bar" />
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/main_player_sheet_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -64,7 +79,7 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 app:behavior_hideable="false"
-                app:behavior_peekHeight="118dp"
+                app:behavior_peekHeight="109dp"
                 app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
                 <FrameLayout
@@ -85,7 +100,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.93" />
+            app:layout_constraintGuide_end="48dp" />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/main_bottom_nav"
@@ -93,7 +108,7 @@
             android:layout_height="0dp"
             android:layout_gravity="start"
             android:background="@color/background"
-            app:itemIconSize="25dp"
+            app:itemIconSize="24dp"
             app:itemIconTint="@color/nav_bar_selector"
             app:labelVisibilityMode="unlabeled"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -1,9 +1,14 @@
 package com.ellpis.KinKena;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkRequest;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,7 +32,10 @@ import com.ellpis.KinKena.Repository.PlaylistRepository;
 import com.ellpis.KinKena.Repository.StorageRepository;
 import com.ellpis.KinKena.Retrofit.MusicRetrofit;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -79,6 +87,11 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
     String ownerID;
     private Retrofit retrofit;
     private Playlist playlist;
+    private ListenerRegistration registration;
+    private boolean completedSetUp = false;
+    private boolean initializingNetworkListener = true;
+    private ConnectivityManager connectivityManager;
+    private ConnectivityManager.NetworkCallback networkCallback;
 
     public static PlaylistItemFragment newInstance(String ownerID, String playlistId, boolean fromFirebase) {
         PlaylistItemFragment myFragment = new PlaylistItemFragment();
@@ -96,9 +109,9 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-            ownerID = getArguments().getString("ownerID");
-            playlistID = getArguments().getString("playlist");
-            isFromFirebase = getArguments().getBoolean("fromFirebase");
+        ownerID = getArguments().getString("ownerID");
+        playlistID = getArguments().getString("playlist");
+        isFromFirebase = getArguments().getBoolean("fromFirebase");
         return inflater.inflate(R.layout.fragment_playlist_item, container, false);
 
     }
@@ -109,25 +122,46 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
         ButterKnife.bind(this, view);
         if (ownerID != null) {
             getPlayList();
+            registerNetworkCallbackV23();
         }
     }
 
     private void getPlayList() {
         if (isFromFirebase) {
-            PlaylistRepository.getPlaylist(ownerID, playlistID, returnedData -> {
-                playlist = returnedData.getResult().toObject(Playlist.class);
-                setupViews();
-                if (playlist != null) {
-                    for (Song song : playlist.getSongs()) {
-                        songs.add(song);
-                        adapter.notifyItemInserted(songs.size() - 1);
-                    }
-                }
-
-            });
+            if (ownerID.equals(FirebaseAuth.getInstance().getUid())) {
+                final DocumentReference docRef = FirebaseFirestore.getInstance()
+                        .collection("Users")
+                        .document(FirebaseAuth.getInstance().getUid())
+                        .collection("Playlists")
+                        .document(playlistID);
+                registration = docRef.addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    loadPlaylist(queryDocumentSnapshots);
+                });
+            } else {
+                PlaylistRepository.getPlaylist(ownerID, playlistID, returnedData -> {
+                    loadPlaylist(returnedData.getResult());
+                });
+            }
         } else {
-            int index = ownerID.indexOf('/');
-            getData(ownerID.substring(0, index), ownerID.substring(index + 1));
+            if (getView() != null) {
+                int index = ownerID.indexOf('/');
+                getData(ownerID.substring(0, index), ownerID.substring(index + 1));
+            }
+
+        }
+    }
+
+    private void loadPlaylist(DocumentSnapshot returnedData) {
+        if (getView() != null) {
+            playlist = returnedData.toObject(Playlist.class);
+            songs.clear();
+            setupViews();
+            if (playlist != null) {
+                for (Song song : playlist.getSongs()) {
+                    songs.add(song);
+                    adapter.notifyItemInserted(songs.size() - 1);
+                }
+            }
         }
     }
 
@@ -161,7 +195,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
             overflowMenu.setVisibility(View.GONE);
             editPlaylist.setVisibility(View.GONE);
         }
-
+        completedSetUp = true;
     }
 
 
@@ -170,19 +204,20 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
             followBtn.setVisibility(View.GONE);
             return;
         }
-        PlaylistRepository.getAllPlaylists(currentUserID,task -> {
+        PlaylistRepository.getAllPlaylists(currentUserID, task -> {
             for (QueryDocumentSnapshot document : task.getResult()) {
-                if(isFromFirebase){
+                if (isFromFirebase) {
                     if (playlist.getId().equals(document.getId())) {
                         isFollowing = true;
                     }
-                }else{
+                } else {
                     if (playlist.getOwnerID().equals(document.getString("ownerID"))) {
                         isFollowing = true;
                     }
                 }
 
             }
+            if (getView() == null) return;
             setIsFollowingDesign();
 
         });
@@ -251,6 +286,9 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                         @Override
                         public void run() {
                             if (resBookSearch.body() != null) {
+                                if (getView() == null) {
+                                    return;
+                                }
                                 playlist = resBookSearch.body();
                                 playlist.setOwnerID(firstPath + "/" + secondPath);
                                 playlist.setFromFirebase(false);
@@ -352,6 +390,48 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                 break;
 
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (registration != null) {
+            registration.remove();
+        }
+        connectivityManager.unregisterNetworkCallback(networkCallback);
+    }
+
+    private void registerNetworkCallbackV23() {
+        connectivityManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkRequest.Builder builder = new NetworkRequest.Builder();
+        networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(Network network) {
+                PlaylistItemFragment.this.getActivity().runOnUiThread(() -> {
+                    if (getView() != null && !initializingNetworkListener && !completedSetUp) {
+                        if (ownerID != null) {
+                            getPlayList();
+                        }
+                    }
+                });
+
+            }
+
+            @Override
+            public void onLost(Network network) {
+                PlaylistItemFragment.this.getActivity().runOnUiThread(() -> {
+
+                });
+
+            }
+
+        };
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            connectivityManager.registerDefaultNetworkCallback(networkCallback);
+
+        }
+        initializingNetworkListener = false;
     }
 
 

@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:minHeight="0dp"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:titleEnabled="false">
 
 
@@ -163,9 +163,9 @@
                     android:id="@+id/profile_cover_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="64dp"
+                    android:layout_marginStart="80dp"
                     android:layout_marginTop="48dp"
-                    android:layout_marginEnd="64dp"
+                    android:layout_marginEnd="80dp"
                     android:layout_marginBottom="16dp"
                     android:backgroundTint="@color/Transparent"
                     app:cardElevation="20dp"
@@ -223,7 +223,8 @@
         android:id="@+id/playlist_rv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="20dp"
+        android:clipToPadding="false"
+        android:paddingBottom="100dp"
         android:visibility="gone"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

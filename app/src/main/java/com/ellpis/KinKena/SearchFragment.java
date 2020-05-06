@@ -35,6 +35,7 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -125,6 +126,12 @@ public class SearchFragment extends Fragment implements SongAdapter.ItemClickLis
 
 
     void setupSearch() {
+        try {
+            Field mCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
+            mCursorDrawableRes.setAccessible(true);
+            mCursorDrawableRes.set(searchview, R.drawable.cursor); //This sets the cursor resource ID to 0 or @null which will make it visible on white background
+        } catch (Exception e) {
+        }
         searchview.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -137,6 +144,7 @@ public class SearchFragment extends Fragment implements SongAdapter.ItemClickLis
                 } else {
 
                 }
+                searchview.clearFocus();
                 return false;
             }
 
@@ -211,7 +219,7 @@ public class SearchFragment extends Fragment implements SongAdapter.ItemClickLis
                 for(int i=0; i<content.getJSONArray("hits").length();i++){
                     Playlist playlist = new Gson().fromJson(content.getJSONArray("hits").get(i).toString(), Playlist.class);
                     playlist.setId(content.getJSONArray("hits").getJSONObject(i).getString("objectID"));
-                    if(!playlist.isPrivate()){
+                    if(!playlist.isPrivacy()){
                         playlists.add(playlist);
                     }
 
@@ -249,9 +257,12 @@ public class SearchFragment extends Fragment implements SongAdapter.ItemClickLis
 
     @Override
     public void onSongItemClick(View view, int position) {
+        this.onPause();
+        searchview.clearFocus();
         searchRepository.addToList(songList.get(position));
         MainActivity.playSong(position, songList, false);
     }
+
 
     public RadioGroup.OnCheckedChangeListener onRadioButtonClicked() {
         // Is the button now checked?
@@ -304,6 +315,7 @@ public class SearchFragment extends Fragment implements SongAdapter.ItemClickLis
 
     @Override
     public void onArtistItemClick(View view, int position) {
+        searchview.clearFocus();
         getFragmentManager().beginTransaction()
                 .replace(getId(), ArtistItemFragment.newInstance(artistList.get(position).getId()+""))
                 .addToBackStack(null)
@@ -312,6 +324,7 @@ public class SearchFragment extends Fragment implements SongAdapter.ItemClickLis
 
     @Override
     public void onPlaylistItemClick(View view, int position) {
+        searchview.clearFocus();
         getFragmentManager().beginTransaction()
                 .replace(getId(), PlaylistItemFragment.newInstance(playlists.get(position).getOwnerID(),playlists.get(position).getId(), true))
                 .addToBackStack(null)
@@ -319,7 +332,14 @@ public class SearchFragment extends Fragment implements SongAdapter.ItemClickLis
     }
 
     @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        this.onResume();
+    }
+
+    @Override
     public void onProfileItemClick(View view, int position) {
+        searchview.clearFocus();
         getFragmentManager().beginTransaction().replace(getId(), ProfileFragment.newInstance(profilesList.get(position).getId()))
                 .addToBackStack(null)
                 .commit();

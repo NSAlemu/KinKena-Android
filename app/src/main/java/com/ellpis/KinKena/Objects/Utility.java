@@ -70,7 +70,7 @@ public class Utility {
                         playlist.setOwnerID(currentUserID);
                         playlist.setTitle(textInputEditText.getText().toString().trim());
                         playlist.setOwnerUsername(MainActivity.username);
-                        playlist.setPrivate(false);
+                        playlist.setPrivacy(false);
                         PlaylistRepository.createPlaylist(playlist,context);
                         Toast.makeText(context,"Playlist Created",Toast.LENGTH_SHORT).show();
                     }
@@ -108,7 +108,7 @@ public class Utility {
                         playlist.setTitle(textInputEditText.getText().toString().trim());
                         playlist.setOwnerID(currentUserID);
                         playlist.setOwnerUsername(MainActivity.username);
-                        playlist.setPrivate(false);
+                        playlist.setPrivacy(false);
                         PlaylistRepository.createPlaylist(playlist,context);
                     }
                 });
@@ -125,7 +125,7 @@ public class Utility {
         LinearLayout linearLayout = new LinearLayout(fragment.getContext());
         linearLayout.setLayoutParams(ll);
         TextInputLayout textInputLayout = textInputLayoutBuilder(fragment.getContext(), "New Name");
-        TextInputEditText textInputEditText = textInputBuilder(fragment.getContext(), "");
+        TextInputEditText textInputEditText = textInputBuilder(fragment.getContext(), playlist.getTitle());
         textInputLayout.addView(textInputEditText);
         linearLayout.addView(textInputLayout);
         linearLayout.setBackgroundColor(fragment.getContext().getResources().getColor(R.color.Transparent));
@@ -174,7 +174,7 @@ public class Utility {
         textInputLayout.addView(textInputEditText);
         linearLayout.addView(textInputLayout);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(fragment.getContext())
-                .setTitle("Change Username\"")
+                .setTitle("Change Username")
                 .setView(linearLayout)
                 .setPositiveButton("Change", new DialogInterface.OnClickListener() {
                     @Override

@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import com.algolia.search.saas.Client;
 import com.algolia.search.saas.Index;
 import com.ellpis.KinKena.Objects.Playlist;
+import com.ellpis.KinKena.Objects.Profile;
 import com.ellpis.KinKena.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -18,6 +19,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,7 +82,11 @@ public class UserRepository {
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     Log.e(TAG, "createUser: savng to algolia");
-                    createSearchUserIndex(Username, FirebaseAuth.getInstance().getUid(),context);
+                    Profile profile = new Profile();
+                    profile.setId(FirebaseAuth.getInstance().getUid());
+                    profile.setEmail(email);
+                    profile.setUsername(Username);
+                    createSearchUserIndex(profile,context);
                     Log.e(TAG, "createUser: saving to firebase" );
                     firebaseFunctionOnAuthTask.onCompleteFunction(task);
                     Log.e(TAG, "createUser: done" );
@@ -93,14 +99,13 @@ public class UserRepository {
 
 
     }
-    private static void createSearchUserIndex(String username, String id, Context context){
+    private static void createSearchUserIndex(Profile profile, Context context){
         Client client = new Client(context.getString(R.string.algolia_application_id), context.getString(R.string.algolia_api_key));
 
         JSONObject jsonObject = null;
         try {
-            jsonObject = new JSONObject("{\"username\": \""+username+"\"}, "
-                    +"{\"objectID\": \""+id+"\"}"
-                    +"{\"profileImage\": \"\"}");
+            jsonObject = new JSONObject(new Gson().toJson(profile));
+            jsonObject.put("objectID", profile.getId());
         } catch (JSONException e) {
             e.printStackTrace();
         }

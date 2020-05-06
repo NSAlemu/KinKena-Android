@@ -31,7 +31,7 @@ public class SignUp extends AppCompatActivity {
     TextInputEditText password;
     @BindView(R.id.signup_conf_password)
     TextInputEditText confPassword;
-    private String TAG="tag";
+    private String TAG = "tag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,29 +42,33 @@ public class SignUp extends AppCompatActivity {
 
     }
 
-    public void signUp(View view){
-        if(!validSignUPForm())
+    public void signUp(View view) {
+        if (!validSignUPForm())
             return;
         setLoading(true);
-        UserRepository.createUser(username.getText().toString().trim(),email.getText().toString(), password.getText().toString(), this, task->{
+        UserRepository.createUser(username.getText().toString().trim(), email.getText().toString(), password.getText().toString(), this, task -> {
             // Sign in success, update UI with the signed-in user's information
-            Log.d(TAG, "createUserWithEmail:success");
-            setLoading(false);
+            if(task.isSuccessful()){
+                Log.d(TAG, "createUserWithEmail:success");
+                Map<String, String> newUserMap = new HashMap<>();
+                newUserMap.put("username", username.getText().toString());
+                newUserMap.put("email", email.getText().toString());
 
-            Map<String, String> newUserMap = new HashMap<>();
-            newUserMap.put("username", username.getText().toString());
-            newUserMap.put("email", email.getText().toString());
-            FirebaseFirestore.getInstance().collection("Users").document(FirebaseAuth.getInstance().getUid())
-                    .set(newUserMap)
-                    .addOnCompleteListener(task1 -> {
-                        Log.e(TAG, "signUp: "+task1.getResult() );
-            }).addOnFailureListener(e -> {
-                Log.e(TAG, "signUp: "+e.toString() );
-            });
-            startActivity(new Intent(SignUp.this, MainActivity.class));
+
+                FirebaseFirestore.getInstance().collection("Users").document(FirebaseAuth.getInstance().getUid()).set(newUserMap)
+                        .addOnCompleteListener(task1 -> {
+
+                            Log.e(TAG, "signUp: " + task1.getResult());
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "signUp: " + e.toString());
+                        });
+                startActivity(new Intent(SignUp.this, MainActivity.class));
+            }else{
+                Toast.makeText(SignUp.this, "Sign in Failed. "+task.getException().getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                setLoading(false);
+            }
         });
-
-
     }
 
     private boolean validSignUPForm() {
@@ -92,14 +96,16 @@ public class SignUp extends AppCompatActivity {
         }
         return isValid;
     }
-    private void setLoading(boolean isLoading){
-        if(isLoading){
+
+    private void setLoading(boolean isLoading) {
+        if (isLoading) {
             findViewById(R.id.signup_container).setVisibility(View.GONE);
-        }else{
+        } else {
             findViewById(R.id.signup_container).setVisibility(View.VISIBLE);
         }
 
     }
+
     public static boolean isValidEmail(CharSequence target) {
         return (!TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches());
     }

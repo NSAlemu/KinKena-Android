@@ -28,6 +28,8 @@ public class Playlist implements Serializable {
 
     private String ownerID;
     private String ownerUsername;
+    @SerializedName("privacy")
+    @Expose
     private boolean privacy;
     private boolean fromFirebase = true;
 
@@ -118,12 +120,12 @@ public class Playlist implements Serializable {
         this.id = id;
     }
 
-    public boolean isPrivate() {
+    public boolean isPrivacy() {
         return privacy;
     }
 
-    public void setPrivate(boolean aPrivate) {
-        privacy = aPrivate;
+    public void setPrivacy(boolean privacy) {
+        this.privacy = privacy;
     }
 
     @Override

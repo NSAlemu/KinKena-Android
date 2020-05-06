@@ -71,7 +71,11 @@ public class AddToPlaylistBottomSheet extends BottomSheetDialog implements Playl
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                playlist.add(document.toObject(Playlist.class));
+                                Playlist newPlaylist = document.toObject(Playlist.class);
+                                if (newPlaylist.getOwnerID().equals(FirebaseAuth.getInstance().getUid())) {
+                                    playlist.add(newPlaylist);
+                                }
+
                                 adapter.notifyItemInserted(playlist.size() - 1);
                             }
                         } else {

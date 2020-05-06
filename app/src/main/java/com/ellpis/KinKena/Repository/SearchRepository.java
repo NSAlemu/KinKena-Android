@@ -17,9 +17,13 @@ public  class SearchRepository {
     SharedPreferences.Editor editor;
     public void addToList(Song song) {
         Gson gson = new Gson();
-
         List<Song> prefSongs = getList();
-        prefSongs.add(song);
+        for (Song savedSong: prefSongs) {
+            if(savedSong.getSongId().equals(song.getSongId())){
+                prefSongs.remove(savedSong);
+            }
+        }
+        prefSongs.add(0,song);
         String json = gson.toJson(prefSongs);
         set("search", json);
     }

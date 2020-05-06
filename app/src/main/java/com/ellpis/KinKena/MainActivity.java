@@ -2,21 +2,26 @@ package com.ellpis.KinKena;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkRequest;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Guideline;
 import androidx.fragment.app.FragmentManager;
 
 import com.ellpis.KinKena.Objects.Song;
+import com.ellpis.KinKena.Objects.Utils;
 import com.ellpis.KinKena.Repository.UserRepository;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -24,7 +29,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import static com.google.android.exoplayer2.Player.REPEAT_MODE_OFF;
@@ -36,13 +40,14 @@ public class MainActivity extends AppCompatActivity {
     static int repeatMode = REPEAT_MODE_OFF;
     BottomNavigationView bottomNavigationView;
     static BottomSheetBehavior sheetBehavior;
-    int bottomNavigationViewMaxheight = 0;
+    int guideLineMaxheight = 0;
     float temp = 0f;
     public static MusicPlayerSheet musicPlayer;
     public static String username;
     String currentUserID = FirebaseAuth.getInstance().getUid();
-    static String arifzefenCookie="";
+    static String arifzefenCookie = "";
     static BottomSheetBehavior.BottomSheetCallback bottomSheetCallback;
+    private Guideline guideLine;
 
 
     @Override
@@ -53,7 +58,9 @@ public class MainActivity extends AppCompatActivity {
         setupBottomNavigation();
         createNotificationChannel();
         bottomNavigationView = findViewById(R.id.main_bottom_nav);
-        bottomNavigationViewMaxheight = bottomNavigationView.getHeight();
+        guideLine = findViewById(R.id.main_bottom_nav_guideline);
+        ConstraintLayout.LayoutParams guideLineParams = (ConstraintLayout.LayoutParams) guideLine.getLayoutParams();
+        guideLineMaxheight = guideLineParams.guideEnd;
         bottomSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -63,39 +70,49 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 if (findViewById(R.id.mini_player) != null) {
-                    findViewById(R.id.mini_player).setAlpha(1 - slideOffset);
-
-                    DisplayMetrics displayMetrics = new DisplayMetrics();
-                    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                    int width = displayMetrics.widthPixels;
-
-                    ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) findViewById(R.id.miniplayer_image_card).getLayoutParams();
-                    params.horizontalBias = slideOffset / 2;
-                    params.verticalBias = slideOffset / 3;
-                    int minWidth = findViewById(R.id.mini_player).getHeight();
-                    params.width = (int) Math.floor((width * (0.5 * slideOffset)) + minWidth);
-                    findViewById(R.id.miniplayer_image_card).setLayoutParams(params);
-                    ((CardView) findViewById(R.id.miniplayer_image_card)).setRadius(20 * slideOffset);
 
 
-                    Guideline guideLine = findViewById(R.id.main_bottom_nav_guideline);
+                    sdf(slideOffset);
                     ConstraintLayout.LayoutParams guideLineParams = (ConstraintLayout.LayoutParams) guideLine.getLayoutParams();
-                    DecimalFormat df = new DecimalFormat("#.##");
-                    if (temp != (0.14 * (slideOffset)) && slideOffset >= 0) {
-                        temp = 0.14f * (slideOffset);
-                        guideLineParams.guidePercent = 0.93f + (temp / 2); // 45% // range: 0 <-> 1
-                    }
+
+                    guideLineParams.guideEnd = (int) Math.floor(guideLineMaxheight * (1 - slideOffset)); // 45% // range: 0 <-> 1
                     guideLine.setLayoutParams(guideLineParams);
                 }
             }
         };
 
         manager = getSupportFragmentManager();
+        registerNetworkCallbackV23();
         findViewById(R.id.main_fragment_search_container).setVisibility(View.GONE);
         prepareUsername();
         prepareCookie();
     }
 
+    void sdf(float slideOffset) {
+        findViewById(R.id.mini_player).setAlpha(1 - slideOffset);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayheight = displayMetrics.heightPixels;
+
+        int minWidth = findViewById(R.id.mini_player).getHeight();
+        int maxWidth = 0;
+        if (findViewById(R.id.miniplsyer_image_end_params).getWidth() > findViewById(R.id.miniplsyer_image_end_params).getHeight())
+            maxWidth = findViewById(R.id.miniplsyer_image_end_params).getHeight();
+        else
+            maxWidth = findViewById(R.id.miniplsyer_image_end_params).getWidth();
+
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) findViewById(R.id.miniplayer_image_card).getLayoutParams();
+        params.horizontalBias = slideOffset / 2;
+        params.verticalBias = slideOffset / 2;
+
+        params.width = (int) Math.floor((maxWidth * (0.9 * slideOffset)) + minWidth);
+        params.height = params.width;
+        params.topMargin = (int) ((displayheight / 15) * slideOffset);
+        findViewById(R.id.miniplayer_image_card).setLayoutParams(params);
+
+
+    }
 
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
@@ -185,11 +202,12 @@ public class MainActivity extends AppCompatActivity {
 
         });
     }
+
     private void prepareCookie() {
-        FirebaseFirestore.getInstance().collection("Keys").document("arifzefenKeys").get().addOnCompleteListener(task->{
-            Log.e("TAG", "prepareCookie: "+task.getResult().getString("cookies") );
+        FirebaseFirestore.getInstance().collection("Keys").document("arifzefenKeys").get().addOnCompleteListener(task -> {
+            Log.e("TAG", "prepareCookie: " + task.getResult().getString("cookies"));
             arifzefenCookie = task.getResult().getString("cookies");
-            Log.e("TAG", "prepareCookie: "+arifzefenCookie );
+            Log.e("TAG", "prepareCookie: " + arifzefenCookie);
         });
     }
 
@@ -228,4 +246,39 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    private void registerNetworkCallbackV23() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkRequest.Builder builder = new NetworkRequest.Builder();
+        if (!Utils.isNetworkConnected(this)) {
+            ((TextView) findViewById(R.id.main_notification_bar)).setText("No Internet Connection");
+            findViewById(R.id.main_notification_bar).setVisibility(View.VISIBLE);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            connectivityManager.registerDefaultNetworkCallback(
+                    new ConnectivityManager.NetworkCallback() {
+                        @Override
+                        public void onAvailable(Network network) {
+                            MainActivity.this.runOnUiThread(() -> {
+                                findViewById(R.id.main_notification_bar).setVisibility(View.GONE);
+                            });
+
+                        }
+
+                        @Override
+                        public void onLost(Network network) {
+                            MainActivity.this.runOnUiThread(() -> {
+                                ((TextView) findViewById(R.id.main_notification_bar)).setText("No Internet Connection");
+                                findViewById(R.id.main_notification_bar).setVisibility(View.VISIBLE);
+                            });
+
+                        }
+                    }
+
+            );
+        }
+    }
+
 }
+
+

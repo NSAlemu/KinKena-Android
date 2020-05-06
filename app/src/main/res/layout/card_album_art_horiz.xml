@@ -33,7 +33,7 @@
             android:maxLines="1"
             android:text="TextView"
             android:textColor="@color/background"
-            android:textSize="14sp"
+            android:textSize="13sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/card_album_art_horiz_image"

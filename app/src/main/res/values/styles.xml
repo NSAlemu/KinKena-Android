@@ -17,7 +17,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/background</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="background">@color/background</item>
+        <item name="android:windowBackground">@drawable/splash_screen</item>
         <item name="android:textColor">@color/White</item>
         <item name="android:fontFamily">@font/montserrat</item>
         <item name="android:textSize">13sp</item>

@@ -31,7 +31,7 @@ import butterknife.ButterKnife;
 
 
 public class ProfileFragment extends Fragment implements PlaylistTabAdapter.ItemClickListener {
-    String profileID="";
+    String profileID = "";
     @BindView(R.id.profile_cover)
     ImageView cover;
     @BindView(R.id.profile_playlists_rv)
@@ -44,6 +44,7 @@ public class ProfileFragment extends Fragment implements PlaylistTabAdapter.Item
     TextView emptyNotifier;
     PlaylistTabAdapter playlistTabAdapter;
     List<Playlist> playlists = new ArrayList<>();
+
     public static ProfileFragment newInstance(String profileID) {
         ProfileFragment fragment = new ProfileFragment();
         Bundle args = new Bundle();
@@ -58,6 +59,7 @@ public class ProfileFragment extends Fragment implements PlaylistTabAdapter.Item
         if (getArguments() != null) {
             profileID = getArguments().getString("profileID");
         }
+
     }
 
     @Override
@@ -70,58 +72,65 @@ public class ProfileFragment extends Fragment implements PlaylistTabAdapter.Item
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ButterKnife.bind(this,view);
+        ButterKnife.bind(this, view);
 
-            getProfile();
-            playlistTabAdapter = new PlaylistTabAdapter(playlists);
-            playlistTabAdapter.setClickListener(this);
-            recyclerView.setAdapter(playlistTabAdapter);
-            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        getProfile();
+        playlistTabAdapter = new PlaylistTabAdapter(playlists);
+        playlistTabAdapter.setClickListener(this);
+        recyclerView.setAdapter(playlistTabAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
     private void getProfile() {
-        UserRepository.getUser(profileID, task->{
-            Picasso.get().load("https://firebasestorage.googleapis.com"+task.getResult().getString("profileImage"))
-                    .placeholder(R.drawable.ic_profile)
-                    .into(cover, new Callback() {
-                        @Override
-                        public void onSuccess() {
-                            coverContainer.setRadius(cover.getWidth()/2f);
-                        }
+        UserRepository.getUser(profileID, task -> {
+            if(getView()!=null){
+                Picasso.get().load("https://firebasestorage.googleapis.com" + task.getResult().getString("profileImage"))
+                        .placeholder(R.drawable.ic_profile)
+                        .into(cover, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                coverContainer.setRadius(cover.getWidth() / 2f);
+                            }
 
-                        @Override
-                        public void onError(Exception e) {
-                            coverContainer.setRadius(cover.getWidth()/2f);
-                        }
-                    });
-            title.setText(task.getResult().getString("username"));
+                            @Override
+                            public void onError(Exception e) {
+                                coverContainer.setRadius(cover.getWidth() / 2f);
+                            }
+                        });
+                title.setText(task.getResult().getString("username"));
+            }
+
         });
 
         PlaylistRepository.getAllPlaylists(profileID, task -> {
-            playlists.clear();
-            for (QueryDocumentSnapshot document : task.getResult()) {
-                Playlist playlist = document.toObject(Playlist.class);
-                Log.e("TAG", "getProfile: "+playlist.toString() );
-                if (playlist.getOwnerID().equals(profileID) && !playlist.isPrivate()) {
-                    playlists.add(playlist);
+            if(getView()!=null) {
+                playlists.clear();
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    Playlist playlist = document.toObject(Playlist.class);
+//                    playlist.setPrivacy(document.getBoolean("privacy"));
+                    Log.e("TAG", "getProfile: " + playlist.toString());
+                    if (playlist.getOwnerID().equals(profileID) && !playlist.isPrivacy()) {
+                        playlists.add(playlist);
+                    }
                 }
+                Log.e("TAG", "getProfile: size = " + playlists.size());
+                playlistTabAdapter.notifyDataSetChanged();
+                setEmptyNotifier();
             }
-            Log.e("TAG", "getProfile: size = "+playlists.size() );
-            playlistTabAdapter.notifyDataSetChanged();
-            setEmptyNotifier();
         });
     }
+
     private void setEmptyNotifier() {
-        if(playlists.size()==0){
+        if (playlists.size() == 0) {
             emptyNotifier.setVisibility(View.VISIBLE);
-        }
-        else{
+        } else {
             emptyNotifier.setVisibility(View.GONE);
         }
     }
+
     @Override
     public void onPlaylistItemClick(View view, int position) {
-        getFragmentManager().beginTransaction().replace(getId(), PlaylistItemFragment.newInstance(playlists.get(position).getOwnerID(),playlists.get(position).getId(), playlists.get(position).isFromFirebase()))
+        getFragmentManager().beginTransaction().replace(getId(), PlaylistItemFragment.newInstance(playlists.get(position).getOwnerID(), playlists.get(position).getId(), playlists.get(position).isFromFirebase()))
                 .addToBackStack(null)
                 .commit();
     }
