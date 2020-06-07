@@ -139,7 +139,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                 });
             } else {
                 PlaylistRepository.getPlaylist(ownerID, playlistID, returnedData -> {
-                    loadPlaylist(returnedData.getResult());
+                    loadPlaylist(returnedData);
                 });
             }
         } else {
@@ -205,7 +205,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
             return;
         }
         PlaylistRepository.getAllPlaylists(currentUserID, task -> {
-            for (QueryDocumentSnapshot document : task.getResult()) {
+            for (QueryDocumentSnapshot document : task) {
                 if (isFromFirebase) {
                     if (playlist.getId().equals(document.getId())) {
                         isFollowing = true;
@@ -350,7 +350,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                                 cover.setImageBitmap(bitmap);
                                 StorageRepository.savePlaylistImageToFirebase(bitmap, playlistID, task -> {
 
-                                    Uri downloadUri = task.getResult();
+                                    Uri downloadUri = task;
                                     try {
                                         FirebaseFirestore.getInstance().collection("Users").document(currentUserID)
                                                 .collection("Playlists").document(playlistID)
@@ -376,7 +376,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                     cover.setImageBitmap(imageBitmap);
                     StorageRepository.savePlaylistImageToFirebase(imageBitmap, playlistID, task -> {
 
-                        Uri downloadUri = task.getResult();
+                        Uri downloadUri = task;
                         try {
                             FirebaseFirestore.getInstance().collection("Users").document(currentUserID)
                                     .collection("Playlists").document(playlistID)

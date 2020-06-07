@@ -30,15 +30,9 @@ public class SimpleCircleCoverAdapter  extends RecyclerView.Adapter<SimpleCircle
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, View.OnDragListener, View.OnTouchListener {
 
         ImageView coverImage;
-
-
-
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             coverImage = itemView.findViewById(R.id.card_simple_circle_cover_image);
-
-
-
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             itemView.setOnDragListener(this);

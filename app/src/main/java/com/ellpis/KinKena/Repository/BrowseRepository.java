@@ -6,11 +6,11 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 public class BrowseRepository {
     public interface FirebaseFunctionOnCompleteDocumentTask {
-        void onCompleteFunction(Task<QuerySnapshot> task);
+        void onCompleteFunction(QuerySnapshot task);
     }
     public static void getBrowseLinks(FirebaseFunctionOnCompleteDocumentTask firebaseFunctionOnCompleteDocumentTask) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            db.collection("Browse").get().addOnCompleteListener(firebaseFunctionOnCompleteDocumentTask::onCompleteFunction);
+            db.collection("Browse").get().addOnSuccessListener(firebaseFunctionOnCompleteDocumentTask::onCompleteFunction);
 
     }
 

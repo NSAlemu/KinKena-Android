@@ -64,15 +64,16 @@ public class MainActivity extends AppCompatActivity {
         bottomSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED || newState == BottomSheetBehavior.STATE_HIDDEN) {
+                    findViewById(R.id.queue_container).setVisibility(View.GONE);
+                }
             }
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 if (findViewById(R.id.mini_player) != null) {
 
-
-                    sdf(slideOffset);
+                    setMiniPlayerImageTransiion(slideOffset);
                     ConstraintLayout.LayoutParams guideLineParams = (ConstraintLayout.LayoutParams) guideLine.getLayoutParams();
 
                     guideLineParams.guideEnd = (int) Math.floor(guideLineMaxheight * (1 - slideOffset)); // 45% // range: 0 <-> 1
@@ -88,8 +89,9 @@ public class MainActivity extends AppCompatActivity {
         prepareCookie();
     }
 
-    void sdf(float slideOffset) {
+    void setMiniPlayerImageTransiion(float slideOffset) {
         findViewById(R.id.mini_player).setAlpha(1 - slideOffset);
+        findViewById(R.id.queue_container).setAlpha(slideOffset);
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -110,8 +112,6 @@ public class MainActivity extends AppCompatActivity {
         params.height = params.width;
         params.topMargin = (int) ((displayheight / 15) * slideOffset);
         findViewById(R.id.miniplayer_image_card).setLayoutParams(params);
-
-
     }
 
     private void createNotificationChannel() {
@@ -142,22 +142,13 @@ public class MainActivity extends AppCompatActivity {
         manager.beginTransaction().replace(R.id.main_fragment_music_player_container, musicPlayer).commit();
     }
 
-    /**
-     * Not yet Implemented
-     *
-     * @param song
-     */
     public static void addToQueue(Song song) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Not Yet implemented
-     *
-     * @param position
-     */
-    public static void playSongInQueue(int position) {
-        throw new UnsupportedOperationException();
+        if(musicPlayer==null){
+            ArrayList<Song> playlist = new ArrayList<>();
+            playlist.add(song);
+            playSong(0, playlist, false);
+        }
+       musicPlayer.addSongToQueue(song);
     }
 
     public void toggleBottomSheet(View view) {
@@ -198,15 +189,14 @@ public class MainActivity extends AppCompatActivity {
     private void prepareUsername() {
         currentUserID = FirebaseAuth.getInstance().getUid();
         UserRepository.getUser(currentUserID, task -> {
-            username = task.getResult().get("username").toString();
+            username = task.get("username").toString();
 
         });
     }
 
     private void prepareCookie() {
-        FirebaseFirestore.getInstance().collection("Keys").document("arifzefenKeys").get().addOnCompleteListener(task -> {
-            Log.e("TAG", "prepareCookie: " + task.getResult().getString("cookies"));
-            arifzefenCookie = task.getResult().getString("cookies");
+        FirebaseFirestore.getInstance().collection("Keys").document("arifzefenKeys").get().addOnSuccessListener(task -> {
+            arifzefenCookie = task.getString("cookies");
             Log.e("TAG", "prepareCookie: " + arifzefenCookie);
         });
     }

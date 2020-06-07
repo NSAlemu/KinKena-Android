@@ -10,7 +10,6 @@ import com.algolia.search.saas.Index;
 import com.ellpis.KinKena.Objects.Playlist;
 import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.R;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -23,11 +22,11 @@ import org.json.JSONObject;
 public class PlaylistRepository {
 
     public interface FirebaseFunctionOnCompleteDocumentTask {
-        void onCompleteFunction(Task<DocumentSnapshot> task);
+        void onCompleteFunction(DocumentSnapshot task);
     }
 
     public interface FirebaseFunctionOnCompleteCollectionTask {
-        void onCompleteFunction(Task<QuerySnapshot> task);
+        void onCompleteFunction(QuerySnapshot task);
     }
 
     public interface FirebaseFunctionOnComplete {
@@ -74,8 +73,8 @@ public class PlaylistRepository {
         String currentUserID = FirebaseAuth.getInstance().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Users").document(currentUserID).collection("Playlists")
-                .add(playlist).addOnCompleteListener(task -> {
-            createSearchPlaylistIndex(playlist, task.getResult().getId(), context);
+                .add(playlist).addOnSuccessListener(task -> {
+            createSearchPlaylistIndex(playlist, task.getId(), context);
         });
     }
 
@@ -110,24 +109,14 @@ public class PlaylistRepository {
         String currentUserID = FirebaseAuth.getInstance().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Users").document(ownerID).collection("Playlists").document(playlistID)
-                .get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                firebaseFunctionOnCompleteDocumentTask.onCompleteFunction(task);
-            } else {
-
-            }
-        });
+                .get().addOnSuccessListener(firebaseFunctionOnCompleteDocumentTask::onCompleteFunction);
     }
 
     public static void getAllPlaylists(String userID, FirebaseFunctionOnCompleteCollectionTask firebaseFunctionOnCompleteCollectionTask) {
         String currentUserID = FirebaseAuth.getInstance().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Users").document(userID).collection("Playlists")
-                .get().addOnCompleteListener(task -> {
-            if (task != null) {
-                firebaseFunctionOnCompleteCollectionTask.onCompleteFunction(task);
-            }
-        });
+                .get().addOnSuccessListener(firebaseFunctionOnCompleteCollectionTask::onCompleteFunction);
     }
 
     private static void createSearchPlaylistIndex(Playlist playlist, String id, Context context) {

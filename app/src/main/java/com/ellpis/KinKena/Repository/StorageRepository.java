@@ -16,7 +16,7 @@ import java.io.ByteArrayOutputStream;
 
 public class StorageRepository {
     public interface FirebaseFunctionOnCompleteTask {
-        void onCompleteFunction(Task<Uri> task);
+        void onCompleteFunction(Uri task);
     }
     public interface FirebaseFunctionOnComplete {
         void onCompleteFunction();
@@ -44,17 +44,9 @@ public class StorageRepository {
 
             // Continue with the task to get the download URL
             return firebaseImageFolder.getDownloadUrl();
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if (task.isSuccessful()) {
-                    firebaseFunctionOnCompleteTask.onCompleteFunction(task);
+        }).addOnSuccessListener(task -> {
+                firebaseFunctionOnCompleteTask.onCompleteFunction(task);
 
-                } else {
-                    // Handle failures
-                    // ...
-                }
-            }
         });
     }
     public static void savePlaylistImageToFirebase(Bitmap imageBitmap, String playlistID, FirebaseFunctionOnCompleteTask firebaseFunctionOnCompleteTask) {
@@ -80,17 +72,9 @@ public class StorageRepository {
 
             // Continue with the task to get the download URL
             return firebaseImageFolder.getDownloadUrl();
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if (task.isSuccessful()) {
-                    firebaseFunctionOnCompleteTask.onCompleteFunction(task);
+        }).addOnSuccessListener(task -> {
+                firebaseFunctionOnCompleteTask.onCompleteFunction(task);
 
-                } else {
-                    // Handle failures
-                    // ...
-                }
-            }
         });
     }
 }

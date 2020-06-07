@@ -7,6 +7,51 @@
     tools:context=".MusicPlayerSheet">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/queue_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background"
+        android:elevation="30dp"
+        android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/music_player_queue_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/Transparent"
+            android:elevation="32dp"
+            android:padding="15dp"
+            android:src="@drawable/ic_close_black_24dp"
+            app:layout_constraintBottom_toBottomOf="@+id/card_queue_title"
+            app:layout_constraintEnd_toEndOf="@+id/card_queue_title"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/card_queue_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_bold"
+            android:paddingStart="16dp"
+            android:paddingTop="15dp"
+            android:paddingBottom="10dp"
+            android:text="Queue"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/card_queue_rv"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/card_queue_title" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/music_player"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -31,7 +76,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.75" />
+            app:layout_constraintGuide_percent="0.78" />
 
         <LinearLayout
             android:id="@+id/mini_player"
@@ -55,10 +100,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="72dp"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="6dp"
                     android:maxLines="1"
                     android:text="Fikirsh New Yegodagne"
-                    android:textColor="@color/OffWhite"
+                    android:textColor="@color/White"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toStartOf="@+id/mini_player_play_pause"
                     app:layout_constraintHorizontal_bias="0.0"
@@ -72,7 +117,7 @@
                     android:layout_marginTop="4dp"
                     android:maxLines="1"
                     android:text="Tilahun Gessese"
-                    android:textColor="@color/OffWhite"
+                    android:textColor="@color/White"
                     app:layout_constraintEnd_toStartOf="@+id/mini_player_play_pause"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="@+id/miniplayer_title"
@@ -142,7 +187,8 @@
             <ImageButton
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/Transparent" />
+                android:background="@color/Transparent"
+                android:clickable="false" />
         </LinearLayout>
 
         <androidx.cardview.widget.CardView
@@ -168,12 +214,15 @@
                     android:id="@+id/exoplayer_previous"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
                     android:adjustViewBounds="true"
-                    android:background="@color/Transparent"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:scaleType="centerCrop"
                     android:src="@drawable/exo_icon_previous"
                     app:layout_constraintBottom_toBottomOf="@+id/exoplayer_playpause"
                     app:layout_constraintEnd_toStartOf="@+id/exoplayer_playpause"
-                    app:layout_constraintHorizontal_bias="0.75"
+                    app:layout_constraintHorizontal_bias="0.83"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/exoplayer_playpause"
                     app:layout_constraintVertical_bias="0.333" />
@@ -184,7 +233,7 @@
                     android:layout_height="0dp"
                     android:layout_marginTop="16dp"
                     android:adjustViewBounds="true"
-                    android:background="@color/Transparent"
+                    android:background="?android:attr/selectableItemBackground"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_play_circle_outline_black_24dp"
                     app:layout_constraintBottom_toTopOf="@+id/guideline3"
@@ -197,12 +246,15 @@
                     android:id="@+id/exoplayer_next"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
                     android:adjustViewBounds="true"
-                    android:background="@color/Transparent"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:scaleType="centerCrop"
                     android:src="@drawable/exo_notification_next"
                     app:layout_constraintBottom_toBottomOf="@+id/exoplayer_playpause"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.25"
+                    app:layout_constraintHorizontal_bias="0.17"
                     app:layout_constraintStart_toEndOf="@+id/exoplayer_playpause"
                     app:layout_constraintTop_toTopOf="@+id/exoplayer_playpause" />
 
@@ -217,49 +269,67 @@
                     android:id="@+id/exoplayer_shuffle"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
                     android:adjustViewBounds="true"
-                    android:background="@color/Transparent"
+                    android:background="?android:attr/selectableItemBackground"
                     android:src="@drawable/ic_shuffle"
-                    app:layout_constraintBottom_toBottomOf="@+id/imageButton3"
-                    app:layout_constraintStart_toStartOf="@+id/exoplayer_previous"
-                    app:layout_constraintTop_toTopOf="@+id/imageButton3"
-                    app:layout_constraintVertical_bias="0.0" />
+                    app:layout_constraintBottom_toBottomOf="@+id/exoplayer_previous"
+                    app:layout_constraintEnd_toStartOf="@+id/exoplayer_previous"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/exoplayer_previous" />
 
                 <ImageButton
                     android:id="@+id/exoplayer_repeat"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
                     android:adjustViewBounds="true"
-                    android:background="@color/Transparent"
+                    android:background="?android:attr/selectableItemBackground"
                     android:src="@drawable/exo_controls_repeat_off"
-                    app:layout_constraintBottom_toBottomOf="@+id/imageButton3"
-                    app:layout_constraintEnd_toEndOf="@+id/exoplayer_next"
-                    app:layout_constraintTop_toTopOf="@+id/imageButton3"
-                    app:layout_constraintVertical_bias="0.0" />
+                    app:layout_constraintBottom_toBottomOf="@+id/exoplayer_next"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/exoplayer_next"
+                    app:layout_constraintTop_toTopOf="@+id/exoplayer_next" />
 
                 <androidx.constraintlayout.widget.Guideline
                     android:id="@+id/guideline3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    app:layout_constraintGuide_percent="0.55" />
+                    app:layout_constraintGuide_percent="0.57" />
 
                 <ImageButton
-                    android:id="@+id/imageButton3"
+                    android:id="@+id/exoplayer_queue"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginBottom="24dp"
                     android:adjustViewBounds="true"
+                    android:background="?android:attr/selectableItemBackground"
                     android:backgroundTint="@color/Transparent"
-                    android:scaleType="centerCrop"
+                    android:scaleType="centerInside"
                     android:src="@drawable/ic_queue_music_black_24dp"
-                    android:visibility="invisible"
+                    android:visibility="visible"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/guideline"
-                    app:layout_constraintStart_toStartOf="@+id/guideline"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/guideline3"
                     app:layout_constraintVertical_bias="0.01999998" />
+
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginBottom="24dp"
+                    android:adjustViewBounds="true"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_cast_black_24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/guideline3" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>

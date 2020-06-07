@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -34,9 +35,15 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.media.session.MediaButtonReceiver;
 import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.ellpis.KinKena.Adapters.QueueAdapter;
 import com.ellpis.KinKena.Objects.Song;
 import com.ellpis.KinKena.Objects.Utility;
+import com.ellpis.KinKena.helper.OnStartDragListener;
+import com.ellpis.KinKena.helper.SimpleItemTouchHelperCallback;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -55,6 +62,7 @@ import com.google.android.exoplayer2.ui.TimeBar;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -72,7 +80,7 @@ import static com.google.android.exoplayer2.Player.STATE_READY;
 
 
 public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListener,
-        Player.EventListener {
+        Player.EventListener, OnStartDragListener, QueueAdapter.QueueItemClickListener {
 
     private String audioURL = "";
     private boolean playWhenReady = true;
@@ -114,7 +122,10 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     ConstraintLayout playerBackground;
     @BindView(R.id.mini_player)
     LinearLayout miniPlayerBackground;
-
+    @BindView(R.id.queue_container)
+    ConstraintLayout queueBackground;
+    @BindView(R.id.card_queue_rv)
+    RecyclerView queueRV;
     private static ConcatenatingMediaSource concatenatedSource;
     private boolean shuffled;
     static ArrayList<Song> queue;
@@ -125,7 +136,8 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     public static MediaSessionConnector mediaSessionConnector;
     private static int headSetHookClicks;
     private AudioManager audioManager;
-
+    private QueueAdapter queueAdapter;
+    private ItemTouchHelper mItemTouchHelper;
 
     public static MusicPlayerSheet newInstance(int currentWindow, ArrayList<Song> playlist, boolean shuffled) {
         MusicPlayerSheet myFragment = new MusicPlayerSheet();
@@ -246,7 +258,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         miniPlaypause.setImageDrawable(getActivity().getDrawable(R.drawable.exo_controls_pause));
         ForegroundService.player.addListener(this);
         setupControls();
-
+        setupQueue();
         sendMediaStyleNotification();
         setRepeatMode();
         setShuffleMode();
@@ -337,25 +349,8 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     }
 
 
-    /**
-     * Not yet Implemented
-     *
-     * @param position
-     */
-    public void playSongInQueue(int position) {
-        //TODO: CREATE ABILITY PLAY FROM QUEUE
-        throw new UnsupportedOperationException();
-    }
 
-    /**
-     * Not yet Implemented
-     *
-     * @param song
-     */
-    public void addSongToQueue(Song song) {
-        //TODO: CREATE ABILITY TO ADD TO QUEUE
-        throw new UnsupportedOperationException();
-    }
+
 
     private void setupSeek() {
         ForegroundService.player.addListener(new ExoPlayer.EventListener() {
@@ -484,7 +479,6 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         setPreviousNextControl();
         if (ForegroundService.player.getShuffleModeEnabled()) {
             shuffleControl.setAlpha(1f);
-
         } else {
             shuffleControl.setAlpha(0.3f);
         }
@@ -533,7 +527,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
         String stateString;
         setPlayPause(!ForegroundService.player.getPlayWhenReady());
-        Log.e(TAG, "onPlayerStateChanged: "+playbackState );
+        Log.e(TAG, "onPlayerStateChanged: " + playbackState);
         switch (playbackState) {
             case ExoPlayer.STATE_IDLE:
                 Log.d("Tag", "onPlayerStateChanged: ");
@@ -572,6 +566,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
         setPreviousNextControl();
         setViews(queue.get(ForegroundService.player.getCurrentWindowIndex()));
+        queueAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -595,6 +590,16 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
 
     }
 
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        mItemTouchHelper.startDrag(viewHolder);
+    }
+
+    @Override
+    public void onQueueItemClick(View view, int position) {
+        ForegroundService.player.seekTo(position,0);
+    }
+
     class MediaReceiver extends BroadcastReceiver {
 
 
@@ -610,4 +615,48 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         }
     }
 
+    private void setupQueue() {
+        queueAdapter = new QueueAdapter(queue);
+        queueAdapter.setClickListener(this);
+        queueRV.setAdapter(queueAdapter);
+        queueRV.setLayoutManager(new LinearLayoutManager(getActivity()));
+        ItemTouchHelper.Callback callback = enableSwipeToDeleteAndUndo();
+        mItemTouchHelper = new ItemTouchHelper(callback);
+        mItemTouchHelper.attachToRecyclerView(queueRV);
+        getView().findViewById(R.id.music_player_queue_close).setOnClickListener(v -> {
+            queueBackground.setVisibility(View.GONE);
+        });
+        getView().findViewById(R.id.exoplayer_queue).setOnClickListener(v -> {
+            queueBackground.setVisibility(View.VISIBLE);
+        });
+    }
+    private SimpleItemTouchHelperCallback enableSwipeToDeleteAndUndo() {
+        return new SimpleItemTouchHelperCallback(queueAdapter, getContext()) {
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
+                final int position = viewHolder.getAdapterPosition();
+                final Song item = queue.get(position);
+
+                queue.remove(position);
+                queueAdapter.notifyItemRemoved(position);
+
+                Snackbar snackbar = Snackbar.make(getView(),"Song removed from Queue", Snackbar.LENGTH_LONG);
+                snackbar.setAction("UNDO", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        queue.add(position, item);
+                        queueAdapter.notifyItemInserted(position);
+                    }
+                });
+                snackbar.setActionTextColor(Color.YELLOW);
+                snackbar.show();
+            }
+        };
+    }
+    public void addSongToQueue(Song song) {
+        int pos = ForegroundService.player.getCurrentWindowIndex()+1;
+        queue.add(pos, song);
+        queueAdapter.notifyItemInserted(pos);
+        concatenatedSource.addMediaSource(buildMediaSource(Uri.parse(ArifzefenSongPath + song.getSongId()), pos));
+    }
 }

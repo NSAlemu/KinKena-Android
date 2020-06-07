@@ -48,7 +48,6 @@ public class SignUp extends AppCompatActivity {
         setLoading(true);
         UserRepository.createUser(username.getText().toString().trim(), email.getText().toString(), password.getText().toString(), this, task -> {
             // Sign in success, update UI with the signed-in user's information
-            if(task.isSuccessful()){
                 Log.d(TAG, "createUserWithEmail:success");
                 Map<String, String> newUserMap = new HashMap<>();
                 newUserMap.put("username", username.getText().toString());
@@ -64,10 +63,10 @@ public class SignUp extends AppCompatActivity {
                             Log.e(TAG, "signUp: " + e.toString());
                         });
                 startActivity(new Intent(SignUp.this, MainActivity.class));
-            }else{
-                Toast.makeText(SignUp.this, "Sign in Failed. "+task.getException().getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                setLoading(false);
-            }
+
+        },e->{
+            Toast.makeText(SignUp.this, "Sign in Failed. ", Toast.LENGTH_LONG).show();
+            setLoading(false);
         });
     }
 

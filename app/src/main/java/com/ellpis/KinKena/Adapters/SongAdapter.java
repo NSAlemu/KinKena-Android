@@ -150,39 +150,29 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         Picasso.get().load("http://www.arifzefen.com" + songList.get(i).getThumbnail())
                 .into(((ImageView) view.findViewById(R.id.card_song_menu_cover)));
 
-        ((LinearLayout) view.findViewById(R.id.card_song_menu_like)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(v.getContext(), songList.get(i).getSongName() + " liked", Toast.LENGTH_LONG).show();
-            }
-        });
+        ((LinearLayout) view.findViewById(R.id.card_song_menu_like)).setOnClickListener((View.OnClickListener) v -> Toast.makeText(v.getContext(), songList.get(i).getSongName() + " liked", Toast.LENGTH_LONG).show());
 //        ((TextView) );
 //        ((TextView)view.findViewById(R.id.card_song_menu_add_playlist));
-//        ((TextView)view.findViewById(R.id.card_song_menu_add_queue));
-//        ;;
+        ((TextView)view.findViewById(R.id.card_song_menu_add_queue)).setOnClickListener(v -> {
+            MainActivity.addToQueue(songList.get(i));
+        });
         BottomSheetDialog menuDialog = new BottomSheetDialog(viewHolder.artist.getContext(), R.style.SheetDialog);
         menuDialog.setContentView(view);
         menuDialog.show();
-        view.findViewById(R.id.card_song_menu_add_playlist).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                menuDialog.dismiss();
-                View newview = ((FragmentActivity) viewHolder.overflowMenu.getContext()).getLayoutInflater().inflate(R.layout.bottomsheet_add_playlist, null);
-                AddToPlaylistBottomSheet dialog = new AddToPlaylistBottomSheet(viewHolder.artist.getContext(), R.style.SheetDialog, callerFragment.getActivity(), songList.get(i));
-                dialog.setContentView(newview);
-                dialog.show();
-            }
+        view.findViewById(R.id.card_song_menu_add_playlist).setOnClickListener(v -> {
+            menuDialog.dismiss();
+            View newview = ((FragmentActivity) viewHolder.overflowMenu.getContext()).getLayoutInflater().inflate(R.layout.bottomsheet_add_playlist, null);
+            AddToPlaylistBottomSheet dialog = new AddToPlaylistBottomSheet(viewHolder.artist.getContext(), R.style.SheetDialog, callerFragment.getActivity(), songList.get(i));
+            dialog.setContentView(newview);
+            dialog.show();
         });
-         view.findViewById(R.id.card_song_menu_view_artist).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                menuDialog.dismiss();
-                callerFragment.getFragmentManager().beginTransaction()
-                        .replace(callerFragment.getId(), ArtistItemFragment.newInstance(songList.get(i).getArtistId()+""))
-                        .addToBackStack(null)
-                        .commit();
-            }
-        });
+         view.findViewById(R.id.card_song_menu_view_artist).setOnClickListener(v -> {
+             menuDialog.dismiss();
+             callerFragment.getFragmentManager().beginTransaction()
+                     .replace(callerFragment.getId(), ArtistItemFragment.newInstance(songList.get(i).getArtistId()+""))
+                     .addToBackStack(null)
+                     .commit();
+         });
         if (ownerId==null || !ownerId.equals(currentUserID)) {
             ((LinearLayout) view.findViewById(R.id.card_song_item_delete_playlist).getParent()).setVisibility(View.GONE);
         }

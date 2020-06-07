@@ -86,8 +86,8 @@ public class AccountSettings extends Fragment {
 
     private void setProfileImage(){
         UserRepository.getUser(FirebaseAuth.getInstance().getUid(),task->{
-            if(task.getResult().get("profileImage")!=null && task.getResult().get("profileImage").toString().length()>4){
-                Picasso.get().load("https://firebasestorage.googleapis.com"+task.getResult().get("profileImage").toString())
+            if(task.get("profileImage")!=null && task.get("profileImage").toString().length()>4){
+                Picasso.get().load("https://firebasestorage.googleapis.com"+task.get("profileImage").toString())
                         .placeholder(R.drawable.ic_profile)
                         .into(cover);
             }
@@ -146,7 +146,7 @@ public class AccountSettings extends Fragment {
                             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                                 cover.setImageBitmap(bitmap);
                                 StorageRepository.saveProfileImageToFirebase(bitmap,task->{
-                                    Uri downloadUri = task.getResult();
+                                    Uri downloadUri = task;
                                     try {
                                         String url = (new URL(downloadUri.toString())).getPath() + "?" + downloadUri.getQuery();
                                         UserRepository.updateProfileImage(url,getContext(),()->{});
@@ -172,7 +172,7 @@ public class AccountSettings extends Fragment {
                         //from Camera
                         cover.setImageBitmap(imageBitmap);
                         StorageRepository.saveProfileImageToFirebase(imageBitmap,task->{
-                            Uri downloadUri = task.getResult();
+                            Uri downloadUri = task;
                             try {
                                 String url = (new URL(downloadUri.toString())).getPath() + "?" + downloadUri.getQuery();
                                 UserRepository.updateProfileImage(url,getContext(), ()->{});

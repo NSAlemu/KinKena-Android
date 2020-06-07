@@ -84,7 +84,7 @@ public class ProfileFragment extends Fragment implements PlaylistTabAdapter.Item
     private void getProfile() {
         UserRepository.getUser(profileID, task -> {
             if(getView()!=null){
-                Picasso.get().load("https://firebasestorage.googleapis.com" + task.getResult().getString("profileImage"))
+                Picasso.get().load("https://firebasestorage.googleapis.com" + task.getString("profileImage"))
                         .placeholder(R.drawable.ic_profile)
                         .into(cover, new Callback() {
                             @Override
@@ -97,7 +97,7 @@ public class ProfileFragment extends Fragment implements PlaylistTabAdapter.Item
                                 coverContainer.setRadius(cover.getWidth() / 2f);
                             }
                         });
-                title.setText(task.getResult().getString("username"));
+                title.setText(task.getString("username"));
             }
 
         });
@@ -105,7 +105,7 @@ public class ProfileFragment extends Fragment implements PlaylistTabAdapter.Item
         PlaylistRepository.getAllPlaylists(profileID, task -> {
             if(getView()!=null) {
                 playlists.clear();
-                for (QueryDocumentSnapshot document : task.getResult()) {
+                for (QueryDocumentSnapshot document : task) {
                     Playlist playlist = document.toObject(Playlist.class);
 //                    playlist.setPrivacy(document.getBoolean("privacy"));
                     Log.e("TAG", "getProfile: " + playlist.toString());

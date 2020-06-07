@@ -11,7 +11,6 @@ import com.ellpis.KinKena.Objects.Playlist;
 import com.ellpis.KinKena.Objects.Profile;
 import com.ellpis.KinKena.R;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -33,10 +32,14 @@ public class UserRepository {
     }
 
     public interface FirebaseFunctionOnCompleteTask {
-        void onCompleteFunction(Task<DocumentSnapshot> task);
+        void onCompleteFunction(DocumentSnapshot task);
     }
+
     public interface FirebaseFunctionOnAuthTask {
-        void onCompleteFunction(Task<AuthResult> task);
+        void onCompleteFunction(AuthResult task);
+    }
+    public interface FirebaseFunctionOnAuthFailTask {
+        void onFailFunction(Exception e);
     }
 
     public static void renameUsername(String newName, Context context, FirebaseFunctionOnComplete firebaseFunctionOnComplete) {
@@ -46,13 +49,13 @@ public class UserRepository {
                 .addOnCompleteListener(task -> {
                     firebaseFunctionOnComplete.onCompleteFunction();
                 });
-        renameSearchUsernameIndex(newName, currentUserID,context);
-        PlaylistRepository.getAllPlaylists(currentUserID, task->{
+        renameSearchUsernameIndex(newName, currentUserID, context);
+        PlaylistRepository.getAllPlaylists(currentUserID, task -> {
             // Get a new write batch
             WriteBatch batch = db.batch();
-            for (QueryDocumentSnapshot document : task.getResult()) {
+            for (QueryDocumentSnapshot document : task) {
                 Playlist playlist = document.toObject(Playlist.class);
-                if(playlist.getOwnerID().equals(currentUserID)){
+                if (playlist.getOwnerID().equals(currentUserID)) {
                     DocumentReference sfRef = db.collection("Users").document(currentUserID)
                             .collection("Playlists").document(playlist.getId());
                     batch.update(sfRef, "ownerUsername", newName);
@@ -66,40 +69,38 @@ public class UserRepository {
         String currentUserID = FirebaseAuth.getInstance().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Users").document(currentUserID).update("profileImage", profileImage)
-                .addOnCompleteListener(task -> {
+                .addOnSuccessListener(task -> {
                     firebaseFunctionOnComplete.onCompleteFunction();
                 });
-        updateSearchProfileImageIndex(profileImage, currentUserID,context);
+        updateSearchProfileImageIndex(profileImage, currentUserID, context);
     }
 
     public static void getUser(String userId, FirebaseFunctionOnCompleteTask firebaseFunctionOnCompleteTask) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Users").document(userId).get()
-                .addOnCompleteListener(task -> firebaseFunctionOnCompleteTask.onCompleteFunction(task));
+                .addOnSuccessListener(task -> firebaseFunctionOnCompleteTask.onCompleteFunction(task));
     }
 
-    public static void createUser(String Username, String email, String password, Context context, FirebaseFunctionOnAuthTask firebaseFunctionOnAuthTask) {
+    public static void createUser(String Username, String email, String password, Context context, FirebaseFunctionOnAuthTask firebaseFunctionOnAuthTask,FirebaseFunctionOnAuthFailTask firebaseFunctionOnAuthFailTask) {
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
+                .addOnSuccessListener(task -> {
                     Log.e(TAG, "createUser: savng to algolia");
                     Profile profile = new Profile();
                     profile.setId(FirebaseAuth.getInstance().getUid());
                     profile.setEmail(email);
                     profile.setUsername(Username);
-                    createSearchUserIndex(profile,context);
-                    Log.e(TAG, "createUser: saving to firebase" );
+                    createSearchUserIndex(profile, context);
+                    Log.e(TAG, "createUser: saving to firebase");
                     firebaseFunctionOnAuthTask.onCompleteFunction(task);
-                    Log.e(TAG, "createUser: done" );
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, "onFailure: "+e.toString() );
-            }
+                    Log.e(TAG, "createUser: done");
+                }).addOnFailureListener(e -> {
+            firebaseFunctionOnAuthFailTask.onFailFunction(e);
         });
 
 
     }
-    private static void createSearchUserIndex(Profile profile, Context context){
+
+    private static void createSearchUserIndex(Profile profile, Context context) {
         Client client = new Client(context.getString(R.string.algolia_application_id), context.getString(R.string.algolia_api_key));
 
         JSONObject jsonObject = null;
@@ -110,16 +111,17 @@ public class UserRepository {
             e.printStackTrace();
         }
         Index index = client.getIndex("Users");
-        index.addObjectAsync(jsonObject, (jsonObject1, e) -> { });
+        index.addObjectAsync(jsonObject, (jsonObject1, e) -> {
+        });
     }
 
-    private static void renameSearchUsernameIndex(String newName, String id, Context context){
+    private static void renameSearchUsernameIndex(String newName, String id, Context context) {
         Client client = new Client(context.getString(R.string.algolia_application_id), context.getString(R.string.algolia_api_key));
 
         Index index = client.getIndex("Users");
         try {
             index.partialUpdateObjectAsync(
-                    new JSONObject("{\"username\": \""+newName+"\"}"),
+                    new JSONObject("{\"username\": \"" + newName + "\"}"),
                     id,
                     null
             );
@@ -127,13 +129,14 @@ public class UserRepository {
             e.printStackTrace();
         }
     }
-    private static void updateSearchProfileImageIndex(String profileImage, String id, Context context){
+
+    private static void updateSearchProfileImageIndex(String profileImage, String id, Context context) {
         Client client = new Client(context.getString(R.string.algolia_application_id), context.getString(R.string.algolia_api_key));
 
         Index index = client.getIndex("Users");
         try {
             index.partialUpdateObjectAsync(
-                    new JSONObject("{\"profileImage\": \""+profileImage+"\"}"),
+                    new JSONObject("{\"profileImage\": \"" + profileImage + "\"}"),
                     id,
                     null
             );
@@ -141,10 +144,12 @@ public class UserRepository {
             e.printStackTrace();
         }
     }
-    private static void deleteSearchPlaylistIndex(String id, Context context){
+
+    private static void deleteSearchPlaylistIndex(String id, Context context) {
         Client client = new Client(context.getString(R.string.algolia_application_id), context.getString(R.string.algolia_api_key));
         Index index = client.getIndex("Users");
-        index.deleteObjectAsync(id, (jsonObject, e) -> {});
+        index.deleteObjectAsync(id, (jsonObject, e) -> {
+        });
 
     }
 }

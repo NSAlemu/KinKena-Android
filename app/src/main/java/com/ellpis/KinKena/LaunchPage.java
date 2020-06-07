@@ -61,25 +61,22 @@ public class LaunchPage extends AppCompatActivity {
         }
         setLoading(true);
         mAuth.signInWithEmailAndPassword(email.getText().toString(), password.getText().toString())
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-
-                            startActivity(new Intent(LaunchPage.this, MainActivity.class));
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            setLoading(false);
-                            Toast.makeText(LaunchPage.this, "Username & Password don't match",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-
-                        // ...
-                    }
+                .addOnSuccessListener(this, task -> {
+//                    if (task!=null) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "signInWithEmail:success");
+                        startActivity(new Intent(LaunchPage.this, MainActivity.class));
+                        finish();
+//                    } else {
+//                        // If sign in fails, display a message to the user.
+//                        Log.w(TAG, "signInWithEmail:failure", task.getException());
+//                        setLoading(false);
+//                        Toast.makeText(LaunchPage.this, "Username & Password don't match",
+//                                Toast.LENGTH_SHORT).show();
+//                    }
+                    Toast.makeText(LaunchPage.this, "Finished signing in "+task.getUser().getEmail(),
+                            Toast.LENGTH_SHORT).show();
+                    // ...
                 }).addOnFailureListener(task->{
             setLoading(false);
             if(task instanceof FirebaseAuthInvalidCredentialsException || task instanceof FirebaseAuthInvalidUserException){

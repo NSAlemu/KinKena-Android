@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -111,9 +112,9 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
         registerNetworkCallbackV23();
     }
 
-    void setupViews(Task<QuerySnapshot> task) {
+    void setupViews(QuerySnapshot task) {
         if (getView() == null) return;
-        for (DocumentSnapshot document : task.getResult().getDocuments()) {
+        for (DocumentSnapshot document : task.getDocuments()) {
             List<String> links = ((List<String>) document.get("links"));
             Collections.shuffle(links);
             linkMap.put(document.getString("title"), links.toArray(new String[0]));
@@ -257,7 +258,8 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
     }
 
     private void loadData(String key, int totalItemCount) {
-        for (int i = totalItemCount; i < linkMap.get(key).length; i++) {
+        if(linkMap.get(key)==null)return;
+        for (int i = totalItemCount; i < Objects.requireNonNull(linkMap.get(key)).length; i++) {
             String url = linkMap.get(key)[i];
             int s = url.indexOf('/');
             try {
