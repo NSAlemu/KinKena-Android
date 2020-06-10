@@ -16,6 +16,8 @@
 package com.ellpis.KinKena;
 
 import android.app.Application;
+import android.content.Context;
+
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.database.DatabaseProvider;
@@ -28,6 +30,7 @@ import com.google.android.exoplayer2.offline.DownloaderConstructorHelper;
 import com.google.android.exoplayer2.ui.DownloadNotificationHelper;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.FileDataSource;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
@@ -38,13 +41,16 @@ import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.Util;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Placeholder application to facilitate overriding Application methods for debugging and testing.
  */
-public class DemoApplication extends Application {
+public class SongDownloadApplication extends Application {
 
     public static final String DOWNLOAD_NOTIFICATION_CHANNEL_ID = "download_channel";
 
@@ -54,7 +60,7 @@ public class DemoApplication extends Application {
     private static final String DOWNLOAD_CONTENT_DIRECTORY = "downloads";
 
     protected String userAgent;
-
+    Context context;
     private DatabaseProvider databaseProvider;
     private File downloadDirectory;
     private Cache downloadCache;
@@ -62,25 +68,41 @@ public class DemoApplication extends Application {
     private DownloadTracker downloadTracker;
     private DownloadNotificationHelper downloadNotificationHelper;
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        userAgent = Util.getUserAgent(this, "ExoPlayerDemo");
+    SongDownloadApplication(Context context) {
+        this.context = context;
+        userAgent = Util.getUserAgent(context, "ExoPlayerDemo");
     }
 
-    /** Returns a {@link DataSource.Factory}. */
+    /**
+     * Returns a {@link DataSource.Factory}.
+     */
     public DataSource.Factory buildDataSourceFactory() {
         DefaultDataSourceFactory upstreamFactory =
-                new DefaultDataSourceFactory(this, buildHttpDataSourceFactory());
+                new DefaultDataSourceFactory(context, buildHttpDataSourceFactory());
         return buildReadOnlyCacheDataSource(upstreamFactory, getDownloadCache());
     }
 
-    /** Returns a {@link HttpDataSource.Factory}. */
+    /**
+     * Returns a {@link HttpDataSource.Factory}.
+     */
     public HttpDataSource.Factory buildHttpDataSourceFactory() {
-        return new DefaultHttpDataSourceFactory(userAgent);
+        HttpDataSource.Factory factory = new HttpDataSource.BaseFactory() {
+            @Override
+            protected HttpDataSource createDataSourceInternal(HttpDataSource.RequestProperties defaultRequestProperties) {
+                HttpDataSource dataSource =
+                        new DefaultHttpDataSource("exoplayer-codelab");
+                // Set a custom authentication request header.
+                dataSource.setRequestProperty("Cookies", MainActivity.arifzefenCookie);
+                dataSource.setRequestProperty("Referer", "http://www.arifzefen.com/");
+                return dataSource;
+            }
+        };
+        return factory;
     }
 
-    /** Returns whether extension renderers should be used. */
+    /**
+     * Returns whether extension renderers should be used.
+     */
     public boolean useExtensionRenderers() {
         return "withExtensions".equals(BuildConfig.FLAVOR);
     }
@@ -93,14 +115,14 @@ public class DemoApplication extends Application {
                         ? DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER
                         : DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
                         : DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF;
-        return new DefaultRenderersFactory(/* context= */ this)
+        return new DefaultRenderersFactory(/* context= */ context)
                 .setExtensionRendererMode(extensionRendererMode);
     }
 
     public DownloadNotificationHelper getDownloadNotificationHelper() {
         if (downloadNotificationHelper == null) {
             downloadNotificationHelper =
-                    new DownloadNotificationHelper(this, DOWNLOAD_NOTIFICATION_CHANNEL_ID);
+                    new DownloadNotificationHelper(context, DOWNLOAD_NOTIFICATION_CHANNEL_ID);
         }
         return downloadNotificationHelper;
     }
@@ -135,9 +157,9 @@ public class DemoApplication extends Application {
                     new DownloaderConstructorHelper(getDownloadCache(), buildHttpDataSourceFactory());
             downloadManager =
                     new DownloadManager(
-                            this, downloadIndex, new DefaultDownloaderFactory(downloaderConstructorHelper));
+                            context, downloadIndex, new DefaultDownloaderFactory(downloaderConstructorHelper));
             downloadTracker =
-                    new DownloadTracker(/* context= */ this, buildDataSourceFactory(), downloadManager);
+                    new DownloadTracker(/* context= */ context, buildDataSourceFactory(), downloadManager);
         }
     }
 
@@ -157,16 +179,16 @@ public class DemoApplication extends Application {
 
     private DatabaseProvider getDatabaseProvider() {
         if (databaseProvider == null) {
-            databaseProvider = new ExoDatabaseProvider(this);
+            databaseProvider = new ExoDatabaseProvider(context);
         }
         return databaseProvider;
     }
 
     private File getDownloadDirectory() {
         if (downloadDirectory == null) {
-            downloadDirectory = getExternalFilesDir(null);
+            downloadDirectory = context.getExternalFilesDir(null);
             if (downloadDirectory == null) {
-                downloadDirectory = getFilesDir();
+                downloadDirectory = context.getFilesDir();
             }
         }
         return downloadDirectory;

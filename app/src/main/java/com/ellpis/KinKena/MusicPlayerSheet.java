@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ellpis.KinKena.Adapters.QueueAdapter;
+import com.ellpis.KinKena.Objects.Playlist;
 import com.ellpis.KinKena.Objects.Song;
 import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.helper.OnStartDragListener;
@@ -51,6 +52,8 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
+import com.google.android.exoplayer2.offline.DownloadRequest;
+import com.google.android.exoplayer2.offline.DownloadService;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
@@ -61,6 +64,7 @@ import com.google.android.exoplayer2.ui.DefaultTimeBar;
 import com.google.android.exoplayer2.ui.TimeBar;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
+import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
@@ -68,6 +72,7 @@ import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -126,9 +131,9 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     ConstraintLayout queueBackground;
     @BindView(R.id.card_queue_rv)
     RecyclerView queueRV;
-    private static ConcatenatingMediaSource concatenatedSource;
+    public static ConcatenatingMediaSource concatenatedSource;
     private boolean shuffled;
-    static ArrayList<Song> queue;
+    public static ArrayList<Song> queue;
     static Bitmap bitmap;
     String ArifzefenSongPath = "http://www.arifzefen.com/json/playSong.php?id=";
     DefaultTrackSelector trackSelector;
@@ -138,6 +143,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     private AudioManager audioManager;
     private QueueAdapter queueAdapter;
     private ItemTouchHelper mItemTouchHelper;
+    private static List<PlaylistItemFragment> observingPlaylists = new ArrayList<>();
 
     public static MusicPlayerSheet newInstance(int currentWindow, ArrayList<Song> playlist, boolean shuffled) {
         MusicPlayerSheet myFragment = new MusicPlayerSheet();
@@ -220,22 +226,37 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     }
 
     private MediaSource buildMediaSource(Uri uri, int playbackPosition) {
-//        Mp3Extractor mp3Extractor = new Mp3Extractor.Flags()
-//        DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-//        extractorsFactory.setMp3ExtractorFlags(Mp3Extractor.FLAG_DISABLE_ID3_METADATA)
-//        extractorsFactory.createExtractors();
-        ProgressiveMediaSource progressiveMediaSource = new ProgressiveMediaSource.Factory(
-                () -> {
-                    HttpDataSource dataSource =
-                            new DefaultHttpDataSource("exoplayer-codelab");
-                    // Set a custom authentication request header.
-                    dataSource.setRequestProperty("Cookies", MainActivity.arifzefenCookie);
-                    dataSource.setRequestProperty("Referer", "http://www.arifzefen.com/");
-                    return dataSource;
+        ProgressiveMediaSource progressiveMediaSource;
+        if (true) {
+            CacheDataSourceFactory dataSourceFactory = new CacheDataSourceFactory(
+                    MainActivity.songDownloadApplication.getDownloadCache(),
+                    () -> {
+                        HttpDataSource dataSource =
+                                new DefaultHttpDataSource("exoplayer-codelab");
+                        // Set a custom authentication request header.
+                        dataSource.setRequestProperty("Cookies", MainActivity.arifzefenCookie);
+                        dataSource.setRequestProperty("Referer", "http://www.arifzefen.com/");
+                        return dataSource;
 
-                })
-                .setTag(playbackPosition)
-                .createMediaSource(uri);
+                    });
+            progressiveMediaSource = new ProgressiveMediaSource
+                    .Factory(dataSourceFactory)
+                    .createMediaSource(uri);
+        } else {
+            progressiveMediaSource = new ProgressiveMediaSource.Factory(
+                    () -> {
+                        HttpDataSource dataSource =
+                                new DefaultHttpDataSource("exoplayer-codelab");
+                        // Set a custom authentication request header.
+                        dataSource.setRequestProperty("Cookies", MainActivity.arifzefenCookie);
+                        dataSource.setRequestProperty("Referer", "http://www.arifzefen.com/");
+                        return dataSource;
+
+                    })
+                    .setTag(playbackPosition)
+                    .createMediaSource(uri);
+        }
+
 
         return progressiveMediaSource;
     }
@@ -347,9 +368,6 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
             getContext().startService(serviceIntent);
         }
     }
-
-
-
 
 
     private void setupSeek() {
@@ -567,6 +585,9 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         setPreviousNextControl();
         setViews(queue.get(ForegroundService.player.getCurrentWindowIndex()));
         queueAdapter.notifyDataSetChanged();
+        for(PlaylistItemFragment playlist: observingPlaylists){
+            playlist.songChanged();
+        }
     }
 
     @Override
@@ -597,7 +618,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
 
     @Override
     public void onQueueItemClick(View view, int position) {
-        ForegroundService.player.seekTo(position,0);
+        ForegroundService.player.seekTo(position, 0);
     }
 
     class MediaReceiver extends BroadcastReceiver {
@@ -630,6 +651,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
             queueBackground.setVisibility(View.VISIBLE);
         });
     }
+
     private SimpleItemTouchHelperCallback enableSwipeToDeleteAndUndo() {
         return new SimpleItemTouchHelperCallback(queueAdapter, getContext()) {
             @Override
@@ -640,7 +662,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
                 queue.remove(position);
                 queueAdapter.notifyItemRemoved(position);
 
-                Snackbar snackbar = Snackbar.make(getView(),"Song removed from Queue", Snackbar.LENGTH_LONG);
+                Snackbar snackbar = Snackbar.make(getView(), "Song removed from Queue", Snackbar.LENGTH_LONG);
                 snackbar.setAction("UNDO", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -653,10 +675,42 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
             }
         };
     }
+
+    public static String getCurrentSongID() {
+        if(ForegroundService.player==null){
+            return null;
+        }
+        return queue.get(ForegroundService.player.getCurrentWindowIndex()).getSongId() + "";
+    }
+
+    public static int addPlaylistObserver(PlaylistItemFragment playlist){
+        observingPlaylists.add(playlist);
+        return observingPlaylists.size()-1;
+    }
+    public static void removePlaylistObserver(int pos){
+        observingPlaylists.remove(pos);
+        observingPlaylists.add(null);
+    }
     public void addSongToQueue(Song song) {
-        int pos = ForegroundService.player.getCurrentWindowIndex()+1;
+        int pos = ForegroundService.player.getCurrentWindowIndex() + 1;
         queue.add(pos, song);
         queueAdapter.notifyItemInserted(pos);
-        concatenatedSource.addMediaSource(buildMediaSource(Uri.parse(ArifzefenSongPath + song.getSongId()), pos));
+        concatenatedSource.addMediaSource(pos, buildMediaSource(Uri.parse(ArifzefenSongPath + song.getSongId()), song.getSongId()));
     }
+
+    public void download(Song song) {
+        DownloadRequest downloadRequest = new DownloadRequest(
+                song.getId(),
+                DownloadRequest.TYPE_PROGRESSIVE,
+                Uri.parse(ArifzefenSongPath + song.getSongId()),
+                /* streamKeys= */ Collections.emptyList(),
+                /* customCacheKey= */ null,
+                null);
+        DownloadService.sendAddDownload(
+                getContext(),
+                SongDownloadService.class,
+                downloadRequest,
+                /* foreground= */ false);
+    }
+
 }

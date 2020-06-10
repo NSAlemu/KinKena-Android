@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ellpis.KinKena.MusicPlayerSheet;
 import com.ellpis.KinKena.R;
 
 /**
@@ -102,6 +103,7 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
         // Notify the adapter of the move
         mAdapter.onItemMove(source.getAdapterPosition(), target.getAdapterPosition());
+        MusicPlayerSheet.concatenatedSource.moveMediaSource(source.getAdapterPosition(), target.getAdapterPosition());
         return true;
     }
 

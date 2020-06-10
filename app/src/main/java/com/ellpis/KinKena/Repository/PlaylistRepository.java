@@ -1,6 +1,8 @@
 package com.ellpis.KinKena.Repository;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
@@ -8,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import com.algolia.search.saas.Client;
 import com.algolia.search.saas.Index;
 import com.ellpis.KinKena.Objects.Playlist;
+import com.ellpis.KinKena.Objects.Song;
 import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -19,8 +22,12 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class PlaylistRepository {
+import java.util.List;
 
+public class PlaylistRepository {
+    public static final String PLAYLIST_DOWNLOAD_ID="PLAYLIST_DOWNLOAD";
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
     public interface FirebaseFunctionOnCompleteDocumentTask {
         void onCompleteFunction(DocumentSnapshot task);
     }
@@ -169,6 +176,15 @@ public class PlaylistRepository {
         Index index = client.getIndex("Playlists");
         index.deleteObjectAsync(id, (jsonObject, e) -> {
         });
-
     }
+//    public static boolean isDownloaded(Playlist playlist){
+//
+//    }
+//    public static boolean download(Playlist playlist){
+//
+//    }
+//    public static boolean deleteDownload(Playlist playlist){
+//
+//    }
+//
 }

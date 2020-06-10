@@ -36,7 +36,7 @@ public class ForegroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         playerNotificationManager = new PlayerNotificationManager(
-                this, getString(R.string.channel_name), 5,
+                this, getString(R.string.player_channel_name), 5,
                 createMediaDescriptionAdapter(),
                 new PlayerNotificationManager.NotificationListener() {
                     @Override

@@ -15,5 +15,6 @@
     <color name="playlist_background">#328282B4</color>
     <color name="bottomsheet_background_color">#F72F2F33</color>
     <color name="musicplayercontrolbackground">#292D2E33</color>
+    <color name="green">#14981A</color>
 
 </resources>

@@ -47,31 +47,43 @@
                     tools:srcCompat="@tools:sample/avatars" />
             </androidx.cardview.widget.CardView>
 
+            <ImageView
+                android:id="@+id/card_song_download_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="13dp"
+                android:adjustViewBounds="true"
+                android:paddingEnd="4dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/search_song_name"
+                app:layout_constraintStart_toStartOf="@+id/search_song_artist"
+                app:layout_constraintTop_toTopOf="@+id/search_song_name"
+                app:srcCompat="@drawable/ic_download_completed" />
+
             <TextView
                 android:id="@+id/search_song_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="8dp"
                 android:fontFamily="@font/montserrat"
                 android:maxLines="1"
                 android:text="TextView"
                 app:layout_constraintEnd_toStartOf="@+id/search_song_overflow_menu"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/cardView2"
+                app:layout_constraintStart_toEndOf="@+id/card_song_download_icon"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/search_song_artist"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
                 android:layout_marginTop="2dp"
+                android:layout_marginEnd="8dp"
                 android:maxLines="1"
                 android:textColor="#D7FFFFFF"
                 android:textSize="12sp"
-                app:layout_constraintEnd_toEndOf="@+id/search_song_name"
-                app:layout_constraintStart_toStartOf="@+id/search_song_name"
+                app:layout_constraintEnd_toStartOf="@+id/search_song_overflow_menu"
+                app:layout_constraintStart_toEndOf="@+id/cardView2"
                 app:layout_constraintTop_toBottomOf="@+id/search_song_name" />
 
             <ImageButton

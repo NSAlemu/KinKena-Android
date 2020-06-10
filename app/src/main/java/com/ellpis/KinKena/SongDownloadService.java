@@ -2,6 +2,7 @@ package com.ellpis.KinKena;
 
 import android.app.Notification;
 import android.content.Context;
+import android.util.Log;
 
 
 import com.google.android.exoplayer2.offline.Download;
@@ -12,6 +13,7 @@ import com.google.android.exoplayer2.ui.DownloadNotificationHelper;
 import com.google.android.exoplayer2.util.NotificationUtil;
 import com.google.android.exoplayer2.util.Util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SongDownloadService extends DownloadService {
@@ -19,6 +21,7 @@ public class SongDownloadService extends DownloadService {
     private static final int JOB_ID = 1;
     private static final int FOREGROUND_NOTIFICATION_ID = 1;
     private static final String DOWNLOAD_NOTIFICATION_CHANNEL_ID = "5";
+    private static List<PlaylistItemFragment> observingPlaylists = new ArrayList<>();
 
     public SongDownloadService() {
         super(
@@ -33,10 +36,9 @@ public class SongDownloadService extends DownloadService {
     protected DownloadManager getDownloadManager() {
         // This will only happen once, because getDownloadManager is guaranteed to be called only once
         // in the life cycle of the process.
-        DemoApplication application = (DemoApplication) getApplication();
-        DownloadManager downloadManager = application.getDownloadManager();
+        DownloadManager downloadManager = MainActivity.songDownloadApplication.getDownloadManager();
         DownloadNotificationHelper downloadNotificationHelper =
-                application.getDownloadNotificationHelper();
+                MainActivity.songDownloadApplication.getDownloadNotificationHelper();
         downloadManager.addListener(
                 new TerminalStateNotificationHelper(
                         this, downloadNotificationHelper, FOREGROUND_NOTIFICATION_ID + 1));
@@ -50,7 +52,7 @@ public class SongDownloadService extends DownloadService {
 
     @Override
     protected Notification getForegroundNotification(List<Download> downloads) {
-        return ((DemoApplication) getApplication())
+        return MainActivity.songDownloadApplication
                 .getDownloadNotificationHelper()
                 .buildProgressNotification(
                         R.drawable.ic_play_circle_filled_black_24dp, /* contentIntent= */ null, /* message= */ null, downloads);
@@ -66,7 +68,7 @@ public class SongDownloadService extends DownloadService {
 
         public TerminalStateNotificationHelper(
                 Context context, DownloadNotificationHelper notificationHelper, int firstNotificationId) {
-            this.context = context.getApplicationContext();
+            this.context = MainActivity.context;
             this.notificationHelper = notificationHelper;
             nextNotificationId = firstNotificationId;
         }
@@ -74,13 +76,16 @@ public class SongDownloadService extends DownloadService {
         @Override
         public void onDownloadChanged(DownloadManager manager, Download download) {
             Notification notification;
+            for(PlaylistItemFragment playlist: observingPlaylists){
+                playlist.songChanged();
+            }
             if (download.state == Download.STATE_COMPLETED) {
                 notification =
                         notificationHelper.buildDownloadCompletedNotification(
                                 R.drawable.ic_play_circle_filled_black_24dp,
                                 /* contentIntent= */ null,
                                 Util.fromUtf8Bytes(download.request.data));
-            } else if (download.state == Download.STATE_FAILED) {
+                           } else if (download.state == Download.STATE_FAILED) {
                 notification =
                         notificationHelper.buildDownloadFailedNotification(
                                 R.drawable.ic_play_circle_filled_black_24dp,
@@ -90,7 +95,15 @@ public class SongDownloadService extends DownloadService {
                 return;
             }
             NotificationUtil.setNotification(context, nextNotificationId++, notification);
+
         }
     }
-
+    public static int addPlaylistObserver(PlaylistItemFragment playlist){
+        observingPlaylists.add(playlist);
+        return observingPlaylists.size()-1;
+    }
+    public static void removePlaylistObserver(int pos){
+        observingPlaylists.remove(pos);
+        observingPlaylists.add(null);
+    }
 }

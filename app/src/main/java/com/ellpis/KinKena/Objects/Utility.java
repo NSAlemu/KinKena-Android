@@ -42,9 +42,25 @@ public class Utility {
                 Math.min(b, 255));
     }
 
-    private interface onButtonClick{
+    public interface onButtonClick {
         void onclick();
     }
+
+    public static void deleteDownloadPlaylist(Context context, onButtonClick buttonClick) {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context)
+                .setTitle("Delete downloaded Songs?")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        buttonClick.onclick();
+                    }
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                });
+        builder.setBackground(context.getDrawable(R.drawable.dialog_backgound));
+        builder.show();
+    }
+
     public static void createPlaylist(Context context, Song song) {
         TextInputLayout textInputLayout = textInputLayoutBuilder(context, "Playlist Name");
         TextInputEditText textInputEditText = textInputBuilder(context, "");
@@ -71,8 +87,8 @@ public class Utility {
                         playlist.setTitle(textInputEditText.getText().toString().trim());
                         playlist.setOwnerUsername(MainActivity.username);
                         playlist.setPrivacy(false);
-                        PlaylistRepository.createPlaylist(playlist,context);
-                        Toast.makeText(context,"Playlist Created",Toast.LENGTH_SHORT).show();
+                        PlaylistRepository.createPlaylist(playlist, context);
+                        Toast.makeText(context, "Playlist Created", Toast.LENGTH_SHORT).show();
                     }
                 });
         builder.setBackground(context.getDrawable(R.drawable.dialog_backgound));
@@ -109,7 +125,7 @@ public class Utility {
                         playlist.setOwnerID(currentUserID);
                         playlist.setOwnerUsername(MainActivity.username);
                         playlist.setPrivacy(false);
-                        PlaylistRepository.createPlaylist(playlist,context);
+                        PlaylistRepository.createPlaylist(playlist, context);
                     }
                 });
         builder.setBackground(context.getDrawable(R.drawable.dialog_backgound));
@@ -143,13 +159,12 @@ public class Utility {
     }
 
     public static void deletePlaylist(Fragment fragment, Playlist playlist) {
-
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(fragment.getContext())
                 .setTitle("Are you sure you want to delete your playlist \"" + playlist.getTitle() + "\"")
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        PlaylistRepository.deletePlaylist(playlist.getId(),fragment.getContext(), () -> fragment.getFragmentManager().popBackStackImmediate());
+                        PlaylistRepository.deletePlaylist(playlist.getId(), fragment.getContext(), () -> fragment.getFragmentManager().popBackStackImmediate());
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -179,7 +194,7 @@ public class Utility {
                 .setPositiveButton("Change", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        UserRepository.renameUsername(textInputEditText.getText().toString().trim(),fragment.getContext(), () -> {
+                        UserRepository.renameUsername(textInputEditText.getText().toString().trim(), fragment.getContext(), () -> {
                             Toast.makeText(fragment.getContext(), "Name cannot be empty", Toast.LENGTH_LONG).show();
                             if (textInputEditText.getText().toString().trim().isEmpty()) {
                                 changeUsername(fragment);

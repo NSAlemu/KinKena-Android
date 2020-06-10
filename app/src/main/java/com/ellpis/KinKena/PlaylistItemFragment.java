@@ -28,6 +28,7 @@ import com.ellpis.KinKena.Adapters.SongAdapter;
 import com.ellpis.KinKena.Objects.Playlist;
 import com.ellpis.KinKena.Objects.PlaylistBottomSheet;
 import com.ellpis.KinKena.Objects.Song;
+import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.Repository.PlaylistRepository;
 import com.ellpis.KinKena.Repository.StorageRepository;
 import com.ellpis.KinKena.Retrofit.MusicRetrofit;
@@ -63,6 +64,8 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
     ImageView cover;
     @BindView(R.id.playlist_item_overflow_menu)
     ImageView overflowMenu;
+    @BindView(R.id.playlist_item_download_icon)
+    ImageView downloadIcon;
     @BindView(R.id.playlist_item_edit_playlist)
     Button editPlaylist;
     @BindView(R.id.playlist_title)
@@ -123,6 +126,8 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
         if (ownerID != null) {
             getPlayList();
             registerNetworkCallbackV23();
+            MusicPlayerSheet.addPlaylistObserver(this);
+            SongDownloadService.addPlaylistObserver(this);
         }
     }
 
@@ -321,7 +326,9 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                 MainActivity.playSong((new Random()).nextInt(playlist.getSongs().size()), (ArrayList<Song>) playlist.getSongs(), true);
         };
     }
-
+//    private View.OnClickListener downloadOnClickListener() {
+//
+//    }
     private View.OnClickListener overflowMenuOnClickListener() {
         return v -> {
             View view = getLayoutInflater().inflate(R.layout.bottomsheet_playlist_menu, null);
@@ -434,6 +441,9 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
         initializingNetworkListener = false;
     }
 
+    public void songChanged(){
+        adapter.notifyDataSetChanged();
+    }
 
 }
 
