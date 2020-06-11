@@ -70,12 +70,16 @@ public class DownloadTracker {
 
     public boolean isDownloaded(Uri uri) {
         Download download = downloads.get(uri);
-        return download != null && download.state != Download.STATE_FAILED;
+        return download != null && download.state == Download.STATE_COMPLETED;
     }
 
     public boolean isQueuedForDownloaded(Uri uri) {
         Download download = downloads.get(uri);
         return download != null && (download.state == Download.STATE_QUEUED || download.state == Download.STATE_DOWNLOADING);
+    }
+    public boolean downloadExists(Uri uri) {
+        Download download = downloads.get(uri);
+        return download != null;
     }
     public boolean isDownloading(Uri uri) {
         Download download = downloads.get(uri);

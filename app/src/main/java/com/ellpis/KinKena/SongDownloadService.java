@@ -52,10 +52,15 @@ public class SongDownloadService extends DownloadService {
 
     @Override
     protected Notification getForegroundNotification(List<Download> downloads) {
+        float percentage = 0;
+        for(Download download:downloads){
+            percentage+=download.getPercentDownloaded();
+        }
+
         return MainActivity.songDownloadApplication
                 .getDownloadNotificationHelper()
                 .buildProgressNotification(
-                        R.drawable.ic_play_circle_filled_black_24dp, /* contentIntent= */ null, /* message= */ null, downloads);
+                        R.drawable.ic_logo, /* contentIntent= */ null, /* message= */ null, downloads);
     }
 
 

@@ -14,7 +14,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.ByteArrayOutputStream;
 
-public class StorageRepository {
+public class CloudStorageRepository {
     public interface FirebaseFunctionOnCompleteTask {
         void onCompleteFunction(Uri task);
     }

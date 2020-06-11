@@ -33,7 +33,6 @@ public  class SearchRepository {
         Type typeOfT = new TypeToken<List<Song>>() {
         }.getType();
         return gson.fromJson(prefs.getString("search", "[]"), typeOfT);
-
     }
 
     public void clearSearchPref() {

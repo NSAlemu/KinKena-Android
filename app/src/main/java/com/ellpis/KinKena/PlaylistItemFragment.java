@@ -10,6 +10,7 @@ import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,8 +30,9 @@ import com.ellpis.KinKena.Objects.Playlist;
 import com.ellpis.KinKena.Objects.PlaylistBottomSheet;
 import com.ellpis.KinKena.Objects.Song;
 import com.ellpis.KinKena.Objects.Utility;
+import com.ellpis.KinKena.Repository.DownloadsRepository;
 import com.ellpis.KinKena.Repository.PlaylistRepository;
-import com.ellpis.KinKena.Repository.StorageRepository;
+import com.ellpis.KinKena.Repository.CloudStorageRepository;
 import com.ellpis.KinKena.Retrofit.MusicRetrofit;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -193,6 +195,12 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
         recyclerView.setVisibility(View.VISIBLE);
         getView().findViewById(R.id.browse_collapser).setVisibility(View.VISIBLE);
         shuffleBtn.setOnClickListener(shuffleOnClickListener());
+        downloadIcon.setOnClickListener(downloadOnClickListener());
+        if(DownloadsRepository.isDownloaded(playlist, getActivity())){
+            downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_downloaded));
+        }else{
+            downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_download_false));
+        }
         if (currentUserID.equals(playlist.getOwnerID())) {
             overflowMenu.setOnClickListener(overflowMenuOnClickListener());
             editPlaylist.setOnClickListener(overflowMenuOnClickListener());
@@ -326,9 +334,22 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                 MainActivity.playSong((new Random()).nextInt(playlist.getSongs().size()), (ArrayList<Song>) playlist.getSongs(), true);
         };
     }
-//    private View.OnClickListener downloadOnClickListener() {
-//
-//    }
+    private View.OnClickListener downloadOnClickListener() {
+        return v->{
+            if(DownloadsRepository.isDownloaded(playlist, getActivity())){
+                Utility.deleteDownloadPlaylist(getContext(),()->{
+                    downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_download_false));
+                    DownloadsRepository.deleteDownload(playlist,getActivity());
+                    getActivity().runOnUiThread(()->{
+                        (new Handler()).postDelayed(() -> adapter.notifyDataSetChanged(), 500);
+                    });
+                });
+            }else{
+                downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_downloaded));
+                DownloadsRepository.downloadPlaylist(playlist,getActivity());
+            }
+        };
+    }
     private View.OnClickListener overflowMenuOnClickListener() {
         return v -> {
             View view = getLayoutInflater().inflate(R.layout.bottomsheet_playlist_menu, null);
@@ -355,7 +376,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                             @Override
                             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                                 cover.setImageBitmap(bitmap);
-                                StorageRepository.savePlaylistImageToFirebase(bitmap, playlistID, task -> {
+                                CloudStorageRepository.savePlaylistImageToFirebase(bitmap, playlistID, task -> {
 
                                     Uri downloadUri = task;
                                     try {
@@ -381,7 +402,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                         return;
                     }
                     cover.setImageBitmap(imageBitmap);
-                    StorageRepository.savePlaylistImageToFirebase(imageBitmap, playlistID, task -> {
+                    CloudStorageRepository.savePlaylistImageToFirebase(imageBitmap, playlistID, task -> {
 
                         Uri downloadUri = task;
                         try {

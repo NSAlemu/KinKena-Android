@@ -22,7 +22,9 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class PlaylistRepository {
     public static final String PLAYLIST_DOWNLOAD_ID="PLAYLIST_DOWNLOAD";
@@ -177,14 +179,6 @@ public class PlaylistRepository {
         index.deleteObjectAsync(id, (jsonObject, e) -> {
         });
     }
-//    public static boolean isDownloaded(Playlist playlist){
-//
-//    }
-//    public static boolean download(Playlist playlist){
-//
-//    }
-//    public static boolean deleteDownload(Playlist playlist){
-//
-//    }
-//
+
+
 }

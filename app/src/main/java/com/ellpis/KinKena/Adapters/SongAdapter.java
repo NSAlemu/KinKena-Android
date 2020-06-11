@@ -136,31 +136,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
                 .into(viewHolder.songCoverImage);
 
         viewHolder.songCoverImage.setAdjustViewBounds(true);
-        viewHolder.songCoverImage.setOnClickListener(v -> {
-            if (isSongDownloaded(songUri) || isSongQueueForDownload(songUri)) {
-                Utility.deleteDownloadPlaylist(viewHolder.downloadIcon.getContext(), () -> {
-                    DownloadService.sendRemoveDownload(
-                            MainActivity.context.getApplicationContext(),
-                            SongDownloadService.class,
-                            songList.get(i).getSongId() + "",
-                            /* foreground= */ true
-                    );
-                });
-            }
-            DownloadRequest downloadRequest = new DownloadRequest(
-                    songList.get(i).getSongId() + "",
-                    DownloadRequest.TYPE_PROGRESSIVE,
-                    songUri,
-                    /* streamKeys= */ Collections.emptyList(),
-                    /* customCacheKey= */ null,
-                    songList.get(i).getSongName().getBytes());
-
-            DownloadService.sendAddDownload(
-                    MainActivity.context.getApplicationContext(),
-                    SongDownloadService.class,
-                    downloadRequest,
-                    /* foreground= */ true);
-        });
         viewHolder.title.setText(songList.get(i).getSongName());
         if (MusicPlayerSheet.getCurrentSongID() != null && MusicPlayerSheet.getCurrentSongID().equals(songList.get(i).getSongId() + "")) {
             viewHolder.title.setTextColor(viewHolder.title.getContext().getResources().getColor(R.color.green));

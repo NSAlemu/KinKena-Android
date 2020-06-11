@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         setupBottomNavigation();
         createNotificationChannel();
         songDownloadApplication = new SongDownloadApplication(getApplicationContext());
+        songDownloadApplication.getDownloadManager().resumeDownloads();
 //        Log.e("TAG", "demoApplication: "+demoApplication.getDownloadManager().addDownload(););
         bottomNavigationView = findViewById(R.id.main_bottom_nav);
         guideLine = findViewById(R.id.main_bottom_nav_guideline);
@@ -125,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
             int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel channel = new NotificationChannel(getString(R.string.player_channel_name), name, importance);
             channel.setDescription(description);
+            channel.setShowBadge(false);
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
@@ -134,7 +136,8 @@ public class MainActivity extends AppCompatActivity {
             String description2 = SongDownloadApplication.DOWNLOAD_NOTIFICATION_CHANNEL_ID;
             int importance2 = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel channel2 = new NotificationChannel(SongDownloadApplication.DOWNLOAD_NOTIFICATION_CHANNEL_ID, name2, importance2);
-            channel.setDescription(description2);
+            channel2.setDescription(description2);
+            channel2.setShowBadge(false);
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             NotificationManager notificationManager2 = getSystemService(NotificationManager.class);
@@ -263,6 +266,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onAvailable(Network network) {
                             MainActivity.this.runOnUiThread(() -> {
                                 findViewById(R.id.main_notification_bar).setVisibility(View.GONE);
+                                songDownloadApplication.getDownloadManager().resumeDownloads();
                             });
 
                         }

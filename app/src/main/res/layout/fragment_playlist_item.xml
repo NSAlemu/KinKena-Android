@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:background="#00FFFFFF"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:visibility="visible">
+        android:visibility="gone">
 
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -187,7 +187,7 @@
 
                 <TextView
                     android:id="@+id/playlist_title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="64dp"
                     android:layout_marginEnd="64dp"
@@ -219,10 +219,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="25dp"
                     android:layout_marginStart="24dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
                     android:adjustViewBounds="true"
                     android:cropToPadding="true"
-                    android:src="@drawable/ic_downloaded"
-                    app:layout_constraintBottom_toBottomOf="@+id/playlist_title"
+                    android:src="@drawable/ic_download_false"
+                    app:layout_constraintBottom_toBottomOf="@+id/playlist_subtitle"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/playlist_title" />
 

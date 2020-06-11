@@ -19,7 +19,7 @@ import androidx.fragment.app.Fragment;
 
 import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.Repository.SearchRepository;
-import com.ellpis.KinKena.Repository.StorageRepository;
+import com.ellpis.KinKena.Repository.CloudStorageRepository;
 import com.ellpis.KinKena.Repository.UserRepository;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
@@ -145,7 +145,7 @@ public class AccountSettings extends Fragment {
                             @Override
                             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                                 cover.setImageBitmap(bitmap);
-                                StorageRepository.saveProfileImageToFirebase(bitmap,task->{
+                                CloudStorageRepository.saveProfileImageToFirebase(bitmap, task->{
                                     Uri downloadUri = task;
                                     try {
                                         String url = (new URL(downloadUri.toString())).getPath() + "?" + downloadUri.getQuery();
@@ -171,7 +171,7 @@ public class AccountSettings extends Fragment {
                     }else{
                         //from Camera
                         cover.setImageBitmap(imageBitmap);
-                        StorageRepository.saveProfileImageToFirebase(imageBitmap,task->{
+                        CloudStorageRepository.saveProfileImageToFirebase(imageBitmap, task->{
                             Uri downloadUri = task;
                             try {
                                 String url = (new URL(downloadUri.toString())).getPath() + "?" + downloadUri.getQuery();
