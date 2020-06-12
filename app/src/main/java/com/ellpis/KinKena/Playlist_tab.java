@@ -17,7 +17,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.ellpis.KinKena.Adapters.PlaylistTabAdapter;
 import com.ellpis.KinKena.Objects.Playlist;
+import com.ellpis.KinKena.Objects.Song;
 import com.ellpis.KinKena.Objects.Utility;
+import com.ellpis.KinKena.Repository.DownloadsRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -34,7 +36,7 @@ import butterknife.ButterKnife;
 import static androidx.constraintlayout.widget.Constraints.TAG;
 
 
-public class Playlist_tab extends Fragment implements PlaylistTabAdapter.ItemClickListener {
+public class Playlist_tab extends Fragment implements PlaylistTabAdapter.ItemClickListener, SongDownloadService.DownloadListener {
     @BindView(R.id.playlist_tab_rv)
     RecyclerView recyclerView;
     @BindView(R.id.playlist_tab_create_playlist)
@@ -87,6 +89,7 @@ public class Playlist_tab extends Fragment implements PlaylistTabAdapter.ItemCli
         registration = docRef.addSnapshotListener((queryDocumentSnapshots, e) -> {
             getPlaylist(queryDocumentSnapshots);
         });
+        SongDownloadService.addDownloadListener(this);
     }
 
     private void getPlaylist(QuerySnapshot queryDocumentSnapshots) {
@@ -95,7 +98,7 @@ public class Playlist_tab extends Fragment implements PlaylistTabAdapter.ItemCli
             playlist.add(document.toObject(Playlist.class));
             final int pos = playlist.size() - 1;
             playlist.get(pos).setId(document.getId());
-
+            DownloadsRepository.updateDownloadedPlaylist(document.toObject(Playlist.class),getActivity());
             if (!playlist.get(pos).isFromFirebase()) {
                 playlist.get(pos).setSubtitle("Arifzfen");
             }
@@ -134,5 +137,11 @@ public class Playlist_tab extends Fragment implements PlaylistTabAdapter.ItemCli
     public void onDestroy() {
         super.onDestroy();
         registration.remove();
+        SongDownloadService.removeDownloadListener(this);
+    }
+
+    @Override
+    public void downloadStatusChanged() {
+        adapter.notifyDataSetChanged();
     }
 }

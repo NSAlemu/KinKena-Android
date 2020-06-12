@@ -20,14 +20,15 @@ import java.util.List;
 import java.util.Set;
 
 public class DownloadsRepository {
-    public static boolean isDownloaded(Playlist playlist, Activity activity) {
-        SharedPreferences sharedPref = activity.getPreferences(Context.MODE_PRIVATE);
+
+    public static boolean isDownloaded(Playlist playlist) {
+        SharedPreferences sharedPref = MainActivity.context.getPreferences(Context.MODE_PRIVATE);
         Set<String> playlistSet = sharedPref.getStringSet(playlist.getId(), new HashSet<>());
         return !playlistSet.isEmpty();
     }
 
     public static void downloadPlaylist(Playlist playlist, Activity activity) {
-        SharedPreferences sharedPref = activity.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = MainActivity.context.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         Set<String> playlistSet = new HashSet<>();
         if (!sharedPref.getStringSet(playlist.getId(), new HashSet<>()).isEmpty()) {
@@ -42,7 +43,7 @@ public class DownloadsRepository {
     }
 
     public static void deleteDownload(Playlist playlist, Activity activity) {
-        SharedPreferences sharedPref = activity.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = MainActivity.context.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         Set<String> playlistSet = new HashSet<>();
         for (Song song : playlist.getSongs()) {
@@ -54,23 +55,22 @@ public class DownloadsRepository {
     }
 
     public static void updateDownloadedPlaylist(Playlist playlist, Activity activity) {
-        SharedPreferences sharedPref = activity.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = MainActivity.context.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         Set<String> playlistSet = sharedPref.getStringSet(playlist.getId(), new HashSet<>());
+        Set<String> tempSet = new HashSet<>();
+        tempSet.addAll(playlistSet);
         if (playlistSet.isEmpty()) {
             return;
         }
         for (Song song : playlist.getSongs()) {
-            if (!playlistSet.contains(song.getId() + "")) {
+            if (!playlistSet.contains(song.getSongId() + "")) {
                 playlistSet.add(song.getSongId() + "");
-                addToAllDownloads(song.getId(), activity);
+                addToAllDownloads(song.getSongId()+"", activity);
             }
+            tempSet.remove(song.getSongId()+"");
         }
-        Set<String> tempSet = new HashSet<>();
-        tempSet.addAll(playlistSet);
-        for (Song song : playlist.getSongs()) {
-            tempSet.remove(song.getId()+"");
-        }
+
         Iterator itr = tempSet.iterator();
         while (itr.hasNext()) {
             String songID = itr.next() + "";
@@ -82,7 +82,7 @@ public class DownloadsRepository {
     }
 
     public static int addToAllDownloads(String songId, Activity activity) {
-        SharedPreferences sharedPref = activity.getSharedPreferences("All_downloads", Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = MainActivity.context.getSharedPreferences("All_downloads", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         int songDownloadCount = sharedPref.getInt(songId, 0);
         if (songDownloadCount == 0) {
@@ -96,7 +96,7 @@ public class DownloadsRepository {
     }
 
     public static int removeFromAllDownloads(String songId, Activity activity) {
-        SharedPreferences sharedPref = activity.getSharedPreferences("All_downloads", Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = MainActivity.context.getSharedPreferences("All_downloads", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         int songDownloadCount = sharedPref.getInt(songId, 0);
         Log.e("TAG", "removeFromAllDownloads:started at "+songDownloadCount);

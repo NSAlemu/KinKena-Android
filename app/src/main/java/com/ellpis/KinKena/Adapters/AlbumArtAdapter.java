@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ellpis.KinKena.Objects.MiniPlaylist;
 import com.ellpis.KinKena.Objects.Playlist;
 import com.ellpis.KinKena.R;
 import com.squareup.picasso.Picasso;
@@ -20,60 +21,60 @@ import java.util.List;
 
 public class AlbumArtAdapter extends RecyclerView.Adapter<AlbumArtAdapter.ViewHolder> {
 
-        List<Playlist> songList;
+    List<MiniPlaylist> songList;
 
-private AlbumArtAdapter.ItemClickListener mClickListener;
-private AlbumArtAdapter.ItemLongClickListener mLongClickListener;
-private AlbumArtAdapter.ItemDragListener mDragListener;
-private AlbumArtAdapter.ItemLTouchListener mLTouchListener;
-
-
-public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, View.OnDragListener, View.OnTouchListener {
-
-    ImageView songCoverImage;
-    TextView title;
-
-    public ViewHolder(@NonNull View itemView) {
-        super(itemView);
-        songCoverImage = itemView.findViewById(R.id.card_abum_art_image);
-        title = itemView.findViewById(R.id.card_abum_art_text);
+    private AlbumArtAdapter.ItemClickListener mClickListener;
+    private AlbumArtAdapter.ItemLongClickListener mLongClickListener;
+    private AlbumArtAdapter.ItemDragListener mDragListener;
+    private AlbumArtAdapter.ItemLTouchListener mLTouchListener;
 
 
-        itemView.setOnClickListener(this);
-        itemView.setOnLongClickListener(this);
-        itemView.setOnDragListener(this);
-        itemView.setOnTouchListener(this);
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, View.OnDragListener, View.OnTouchListener {
+
+        ImageView songCoverImage;
+        TextView title;
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            songCoverImage = itemView.findViewById(R.id.card_abum_art_image);
+            title = itemView.findViewById(R.id.card_abum_art_text);
+
+
+            itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
+            itemView.setOnDragListener(this);
+            itemView.setOnTouchListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (mClickListener != null)
+                mClickListener.onItemClick(v, getAdapterPosition(), songList.get(getAdapterPosition()));
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if (mLongClickListener != null)
+                mLongClickListener.onLongClick(v, getAdapterPosition());
+            return false;
+        }
+
+        @Override
+        public boolean onDrag(View v, DragEvent event) {
+            if (mDragListener != null)
+                mDragListener.onItemDrag(v, getAdapterPosition(), event);
+            return false;
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if (mLTouchListener != null)
+                mLTouchListener.onItemTouch(v, getAdapterPosition(), event);
+            return false;
+        }
     }
 
-    @Override
-    public void onClick(View v) {
-        if (mClickListener != null)
-            mClickListener.onItemClick(v, getAdapterPosition(), songList.get( getAdapterPosition()));
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        if (mLongClickListener != null)
-            mLongClickListener.onLongClick(v, getAdapterPosition());
-        return false;
-    }
-
-    @Override
-    public boolean onDrag(View v, DragEvent event) {
-        if (mDragListener != null)
-            mDragListener.onItemDrag(v, getAdapterPosition(), event);
-        return false;
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        if (mLTouchListener != null)
-            mLTouchListener.onItemTouch(v, getAdapterPosition(), event);
-        return false;
-    }
-}
-
-    public AlbumArtAdapter(List<Playlist> bookCoverList) {
+    public AlbumArtAdapter(List<MiniPlaylist> bookCoverList) {
         songList = bookCoverList;
     }
 
@@ -94,34 +95,34 @@ public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickL
 
     @Override
     public void onBindViewHolder(@NonNull AlbumArtAdapter.ViewHolder viewHolder, int i) {
-    try {
-        Picasso.get().load("http://www.arifzefen.com"+songList.get(i).getThumbnail())
-                .placeholder(R.drawable.ic_logo)
-                .fit()
-                .into(viewHolder.songCoverImage);
+        try {
+            Picasso.get().load("http://www.arifzefen.com" + songList.get(i).getThumbnail())
+                    .placeholder(R.drawable.ic_logo)
+                    .fit()
+                    .into(viewHolder.songCoverImage);
 
-    }catch (Exception e){
-        Picasso.get().load(R.drawable.ic_library_music_black_24dp).into(viewHolder.songCoverImage);
-    }
+        } catch (Exception e) {
+            Picasso.get().load(R.drawable.ic_library_music_black_24dp).into(viewHolder.songCoverImage);
+        }
         try {
             viewHolder.title.setText(songList.get(i).getTitle());
-        }catch (Exception e){
+        } catch (Exception e) {
             try {
-                viewHolder.title.setText(songList.get(i).getSubtitle().substring(0,10));
-            }catch (Exception ex){
+                viewHolder.title.setText(songList.get(i).getSubtitle().substring(0, 10));
+            } catch (Exception ex) {
                 viewHolder.title.setText("");
             }
         }
     }
 
 
-    public void add(Playlist item) {
+    public void add(MiniPlaylist item) {
         int size = songList.size();
         songList.add(item);
 
     }
 
-    public void setSongList(List<Playlist> bookList) {
+    public void setSongList(List<MiniPlaylist> bookList) {
         this.songList = bookList;
     }
 
@@ -139,29 +140,35 @@ public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickL
     public void setClickListener(AlbumArtAdapter.ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
+
     public void setLongClickListener(AlbumArtAdapter.ItemLongClickListener itemLongClickListener) {
         this.mLongClickListener = itemLongClickListener;
     }
+
     public void setDragListener(AlbumArtAdapter.ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
+
     public void setTouchListener(AlbumArtAdapter.ItemLongClickListener itemLongClickListener) {
         this.mLongClickListener = itemLongClickListener;
     }
 
-// parent activity will implement this method to respond to click events
-public interface ItemClickListener {
-    void onItemClick(View view, int position, Playlist result);
-}
-public interface ItemLongClickListener {
-    void onLongClick(View view, int position);
-}
-public interface ItemDragListener {
-    void onItemDrag(View view, int position, DragEvent event);
-}
-public interface ItemLTouchListener {
-    void onItemTouch(View view, int position,  MotionEvent event);
-}
+    // parent activity will implement this method to respond to click events
+    public interface ItemClickListener {
+        void onItemClick(View view, int position, MiniPlaylist result);
+    }
+
+    public interface ItemLongClickListener {
+        void onLongClick(View view, int position);
+    }
+
+    public interface ItemDragListener {
+        void onItemDrag(View view, int position, DragEvent event);
+    }
+
+    public interface ItemLTouchListener {
+        void onItemTouch(View view, int position, MotionEvent event);
+    }
 
 
 }

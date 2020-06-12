@@ -2,7 +2,6 @@ package com.ellpis.KinKena;
 
 import android.app.Notification;
 import android.content.Context;
-import android.util.Log;
 
 
 import com.google.android.exoplayer2.offline.Download;
@@ -21,7 +20,7 @@ public class SongDownloadService extends DownloadService {
     private static final int JOB_ID = 1;
     private static final int FOREGROUND_NOTIFICATION_ID = 1;
     private static final String DOWNLOAD_NOTIFICATION_CHANNEL_ID = "5";
-    private static List<PlaylistItemFragment> observingPlaylists = new ArrayList<>();
+    public static List<DownloadListener> mDownloadListener = new ArrayList<>();
 
     public SongDownloadService() {
         super(
@@ -81,8 +80,8 @@ public class SongDownloadService extends DownloadService {
         @Override
         public void onDownloadChanged(DownloadManager manager, Download download) {
             Notification notification;
-            for(PlaylistItemFragment playlist: observingPlaylists){
-                playlist.songChanged();
+            for(DownloadListener downloadListener : mDownloadListener){
+                downloadListener.downloadStatusChanged();
             }
             if (download.state == Download.STATE_COMPLETED) {
                 notification =
@@ -103,12 +102,13 @@ public class SongDownloadService extends DownloadService {
 
         }
     }
-    public static int addPlaylistObserver(PlaylistItemFragment playlist){
-        observingPlaylists.add(playlist);
-        return observingPlaylists.size()-1;
+    public interface DownloadListener {
+        void downloadStatusChanged();
     }
-    public static void removePlaylistObserver(int pos){
-        observingPlaylists.remove(pos);
-        observingPlaylists.add(null);
+    public static void addDownloadListener(DownloadListener downloadListener) {
+        mDownloadListener.add(downloadListener);
+    }
+    public static void removeDownloadListener(DownloadListener downloadListener) {
+        mDownloadListener.remove(downloadListener);
     }
 }

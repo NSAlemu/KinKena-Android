@@ -40,7 +40,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 
-public class ArtistItemFragment extends Fragment implements SongAdapter.ItemClickListener, SimpleCircleCoverAdapter.ItemClickListener {
+public class ArtistItemFragment extends Fragment implements SongAdapter.ItemClickListener, SimpleCircleCoverAdapter.ItemClickListener,
+        MusicPlayerSheet.TrackChangeListener, SongDownloadService.DownloadListener {
     private final String BASE_URL = "http://www.arifzefen.com";
     @BindView(R.id.artist_title)
     TextView title;
@@ -91,8 +92,16 @@ public class ArtistItemFragment extends Fragment implements SongAdapter.ItemClic
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-
+        MusicPlayerSheet.addTrackChangeListener(this);
+        SongDownloadService.addDownloadListener(this);
         getData();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        MusicPlayerSheet.removeTrackChangeListener(this);
+        SongDownloadService.removeDownloadListener(this);
     }
 
     void getData() {
@@ -222,5 +231,17 @@ public class ArtistItemFragment extends Fragment implements SongAdapter.ItemClic
             float y = albumListRv.getY() + albumListRv.getChildAt(position).getY();
             ((NestedScrollView) getView().findViewById(R.id.artist_item_nestedscrollview)).smoothScrollTo(0, (int) y);
         });
+    }
+
+    @Override
+    public void trackChanged() {
+        albumListAdapter.notifyDataSetChanged();
+        topTrackAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void downloadStatusChanged() {
+        albumListAdapter.notifyDataSetChanged();
+        topTrackAdapter.notifyDataSetChanged();
     }
 }

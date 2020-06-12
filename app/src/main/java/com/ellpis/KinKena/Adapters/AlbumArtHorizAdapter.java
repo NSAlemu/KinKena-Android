@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ellpis.KinKena.Objects.MiniPlaylist;
 import com.ellpis.KinKena.Objects.Playlist;
 import com.ellpis.KinKena.R;
 import com.squareup.picasso.Picasso;
@@ -20,12 +21,12 @@ import java.util.List;
 
 public class AlbumArtHorizAdapter extends RecyclerView.Adapter<AlbumArtHorizAdapter.ViewHolder> {
 
-    List<Playlist> songList;
+    List<MiniPlaylist> songList;
 
-    private AlbumArtHorizAdapter.ItemClickListener mClickListener;
-    private AlbumArtHorizAdapter.ItemLongClickListener mLongClickListener;
-    private AlbumArtHorizAdapter.ItemDragListener mDragListener;
-    private AlbumArtHorizAdapter.ItemLTouchListener mLTouchListener;
+    private AlbumArtAdapter.ItemClickListener mClickListener;
+    private AlbumArtAdapter.ItemLongClickListener mLongClickListener;
+    private AlbumArtAdapter.ItemDragListener mDragListener;
+    private AlbumArtAdapter.ItemLTouchListener mLTouchListener;
 
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, View.OnDragListener, View.OnTouchListener {
@@ -76,7 +77,7 @@ public class AlbumArtHorizAdapter extends RecyclerView.Adapter<AlbumArtHorizAdap
         }
     }
 
-    public AlbumArtHorizAdapter(List<Playlist> bookCoverList) {
+    public AlbumArtHorizAdapter(List<MiniPlaylist> bookCoverList) {
         songList = bookCoverList;
     }
 
@@ -115,13 +116,13 @@ public class AlbumArtHorizAdapter extends RecyclerView.Adapter<AlbumArtHorizAdap
         }
     }
 
-    public void add(Playlist item) {
+    public void add(MiniPlaylist item) {
         int size = songList.size();
         songList.add(item);
 
     }
 
-    public void setSongList(List<Playlist> bookList) {
+    public void setSongList(List<MiniPlaylist> bookList) {
         this.songList = bookList;
     }
 
@@ -136,32 +137,20 @@ public class AlbumArtHorizAdapter extends RecyclerView.Adapter<AlbumArtHorizAdap
     }
     // allows clicks events to be caught
 
-    public void setClickListener(AlbumArtHorizAdapter.ItemClickListener itemClickListener) {
+    public void setClickListener(AlbumArtAdapter.ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
-    public void setLongClickListener(AlbumArtHorizAdapter.ItemLongClickListener itemLongClickListener) {
-        this.mLongClickListener = itemLongClickListener;
-    }
-    public void setDragListener(AlbumArtHorizAdapter.ItemClickListener itemClickListener) {
-        this.mClickListener = itemClickListener;
-    }
-    public void setTouchListener(AlbumArtHorizAdapter.ItemLongClickListener itemLongClickListener) {
+
+    public void setLongClickListener(AlbumArtAdapter.ItemLongClickListener itemLongClickListener) {
         this.mLongClickListener = itemLongClickListener;
     }
 
-    // parent activity will implement this method to respond to click events
-    public interface ItemClickListener {
-        void onItemClick(View view, int position, Playlist result);
-    }
-    public interface ItemLongClickListener {
-        void onLongClick(View view, int position);
-    }
-    public interface ItemDragListener {
-        void onItemDrag(View view, int position, DragEvent event);
-    }
-    public interface ItemLTouchListener {
-        void onItemTouch(View view, int position,  MotionEvent event);
+    public void setDragListener(AlbumArtAdapter.ItemClickListener itemClickListener) {
+        this.mClickListener = itemClickListener;
     }
 
+    public void setTouchListener(AlbumArtAdapter.ItemLongClickListener itemLongClickListener) {
+        this.mLongClickListener = itemLongClickListener;
+    }
 
 }

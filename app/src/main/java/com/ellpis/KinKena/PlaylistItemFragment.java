@@ -60,7 +60,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import static android.app.Activity.RESULT_OK;
 
 
-public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemClickListener {
+public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemClickListener, MusicPlayerSheet.TrackChangeListener, SongDownloadService.DownloadListener {
 
     @BindView(R.id.playlist_cover)
     ImageView cover;
@@ -117,6 +117,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
         ownerID = getArguments().getString("ownerID");
         playlistID = getArguments().getString("playlist");
         isFromFirebase = getArguments().getBoolean("fromFirebase");
+        MusicPlayerSheet.addTrackChangeListener(this);
         return inflater.inflate(R.layout.fragment_playlist_item, container, false);
 
     }
@@ -128,8 +129,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
         if (ownerID != null) {
             getPlayList();
             registerNetworkCallbackV23();
-            MusicPlayerSheet.addPlaylistObserver(this);
-            SongDownloadService.addPlaylistObserver(this);
+            SongDownloadService.addDownloadListener(this);
         }
     }
 
@@ -196,7 +196,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
         getView().findViewById(R.id.browse_collapser).setVisibility(View.VISIBLE);
         shuffleBtn.setOnClickListener(shuffleOnClickListener());
         downloadIcon.setOnClickListener(downloadOnClickListener());
-        if(DownloadsRepository.isDownloaded(playlist, getActivity())){
+        if(DownloadsRepository.isDownloaded(playlist)){
             downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_downloaded));
         }else{
             downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_download_false));
@@ -336,7 +336,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
     }
     private View.OnClickListener downloadOnClickListener() {
         return v->{
-            if(DownloadsRepository.isDownloaded(playlist, getActivity())){
+            if(DownloadsRepository.isDownloaded(playlist)){
                 Utility.deleteDownloadPlaylist(getContext(),()->{
                     downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_download_false));
                     DownloadsRepository.deleteDownload(playlist,getActivity());
@@ -427,6 +427,8 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
             registration.remove();
         }
         connectivityManager.unregisterNetworkCallback(networkCallback);
+        MusicPlayerSheet.removeTrackChangeListener(this);
+        SongDownloadService.removeDownloadListener(this);
     }
 
     private void registerNetworkCallbackV23() {
@@ -462,9 +464,14 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
         initializingNetworkListener = false;
     }
 
-    public void songChanged(){
+    @Override
+    public void trackChanged() {
         adapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void downloadStatusChanged() {
+        adapter.notifyDataSetChanged();
+    }
 }
 

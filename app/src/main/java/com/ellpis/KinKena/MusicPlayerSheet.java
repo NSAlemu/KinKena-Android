@@ -40,7 +40,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ellpis.KinKena.Adapters.QueueAdapter;
-import com.ellpis.KinKena.Objects.Playlist;
 import com.ellpis.KinKena.Objects.Song;
 import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.helper.OnStartDragListener;
@@ -143,7 +142,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     private AudioManager audioManager;
     private QueueAdapter queueAdapter;
     private ItemTouchHelper mItemTouchHelper;
-    private static List<PlaylistItemFragment> observingPlaylists = new ArrayList<>();
+    public static List<TrackChangeListener> mTrackChangeListener = new ArrayList<>();
 
     public static MusicPlayerSheet newInstance(int currentWindow, ArrayList<Song> playlist, boolean shuffled) {
         MusicPlayerSheet myFragment = new MusicPlayerSheet();
@@ -585,8 +584,8 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         setPreviousNextControl();
         setViews(queue.get(ForegroundService.player.getCurrentWindowIndex()));
         queueAdapter.notifyDataSetChanged();
-        for(PlaylistItemFragment playlist: observingPlaylists){
-            playlist.songChanged();
+        for(TrackChangeListener trackChangeListener:mTrackChangeListener){
+            trackChangeListener.trackChanged();
         }
     }
 
@@ -682,15 +681,16 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         }
         return queue.get(ForegroundService.player.getCurrentWindowIndex()).getSongId() + "";
     }
+    public interface TrackChangeListener{
+        void trackChanged();
+    }
+    public static void addTrackChangeListener(TrackChangeListener trackChangeListener) {
+        mTrackChangeListener.add(trackChangeListener);
+    }
+    public static void removeTrackChangeListener(TrackChangeListener trackChangeListener) {
+        mTrackChangeListener.remove(trackChangeListener);
+    }
 
-    public static int addPlaylistObserver(PlaylistItemFragment playlist){
-        observingPlaylists.add(playlist);
-        return observingPlaylists.size()-1;
-    }
-    public static void removePlaylistObserver(int pos){
-        observingPlaylists.remove(pos);
-        observingPlaylists.add(null);
-    }
     public void addSongToQueue(Song song) {
         int pos = ForegroundService.player.getCurrentWindowIndex() + 1;
         queue.add(pos, song);

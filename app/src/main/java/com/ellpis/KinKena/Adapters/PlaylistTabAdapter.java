@@ -1,6 +1,8 @@
 package com.ellpis.KinKena.Adapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -12,8 +14,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ellpis.KinKena.MainActivity;
 import com.ellpis.KinKena.Objects.Playlist;
 import com.ellpis.KinKena.R;
+import com.ellpis.KinKena.Repository.DownloadsRepository;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -30,7 +34,7 @@ public class PlaylistTabAdapter extends RecyclerView.Adapter<PlaylistTabAdapter.
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, View.OnDragListener, View.OnTouchListener {
 
-        ImageView songCoverImage, overflowMenu;
+        ImageView songCoverImage, overflowMenu, downloadIcon;
         TextView title, artist;
 
 
@@ -40,6 +44,8 @@ public class PlaylistTabAdapter extends RecyclerView.Adapter<PlaylistTabAdapter.
             title = itemView.findViewById(R.id.search_song_name);
             artist = itemView.findViewById(R.id.search_song_artist);
             overflowMenu = itemView.findViewById(R.id.search_song_overflow_menu);
+            downloadIcon = itemView.findViewById(R.id.card_song_download_icon);
+
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             itemView.setOnDragListener(this);
@@ -117,10 +123,18 @@ public class PlaylistTabAdapter extends RecyclerView.Adapter<PlaylistTabAdapter.
         }else{
             viewHolder.artist.setText(playlists.get(i).getSubtitle());
         }
+        if(DownloadsRepository.isDownloaded(playlists.get(i))){
+            viewHolder.downloadIcon.setVisibility(View.VISIBLE);
+        }else{
+            viewHolder.downloadIcon.setVisibility(View.GONE);
+        }
+
 
         viewHolder.overflowMenu.setVisibility(View.GONE);
 
     }
+
+
 
 
     public void add(Playlist item) {

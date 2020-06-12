@@ -30,7 +30,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class ProfileFragment extends Fragment implements PlaylistTabAdapter.ItemClickListener {
+public class ProfileFragment extends Fragment implements PlaylistTabAdapter.ItemClickListener, SongDownloadService.DownloadListener {
     String profileID = "";
     @BindView(R.id.profile_cover)
     ImageView cover;
@@ -79,6 +79,13 @@ public class ProfileFragment extends Fragment implements PlaylistTabAdapter.Item
         playlistTabAdapter.setClickListener(this);
         recyclerView.setAdapter(playlistTabAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        SongDownloadService.removeDownloadListener(this);
     }
 
     private void getProfile() {
@@ -133,5 +140,10 @@ public class ProfileFragment extends Fragment implements PlaylistTabAdapter.Item
         getFragmentManager().beginTransaction().replace(getId(), PlaylistItemFragment.newInstance(playlists.get(position).getOwnerID(), playlists.get(position).getId(), playlists.get(position).isFromFirebase()))
                 .addToBackStack(null)
                 .commit();
+    }
+
+    @Override
+    public void downloadStatusChanged() {
+        playlistTabAdapter.notifyDataSetChanged();
     }
 }
