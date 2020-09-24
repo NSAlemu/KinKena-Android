@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ellpis.KinKena.Objects.SearchArtist;
+import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -111,9 +112,11 @@ public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickL
 
     @Override
     public void onBindViewHolder(@NonNull ArtistListAdapter.ViewHolder viewHolder, int i) {
+        Utility.getImageLinkMini( searchArtistList.get(i).getThumbnail(), link -> {
+            Picasso.get().load(link )
+                    .into(viewHolder.songCoverImage);
+        });
 
-        Picasso.get().load("http://www.arifzefen.com" + searchArtistList.get(i).getThumbnail())
-                .into(viewHolder.songCoverImage);
 
         viewHolder.songCoverImage.setAdjustViewBounds(true);
         viewHolder.title.setText(searchArtistList.get(i).getName());

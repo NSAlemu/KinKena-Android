@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ellpis.KinKena.Adapters.SongAdapter;
+import com.ellpis.KinKena.Objects.Dialogs;
 import com.ellpis.KinKena.Objects.Playlist;
 import com.ellpis.KinKena.Objects.PlaylistBottomSheet;
 import com.ellpis.KinKena.Objects.Song;
@@ -184,7 +185,10 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
             if (playlist.isFromFirebase()) {
                 Picasso.get().load("https://firebasestorage.googleapis.com" + playlist.getThumbnail()).into(cover);
             } else {
-                Picasso.get().load("http://www.arifzefen.com" + playlist.getThumbnail()).into(cover);
+                Utility.getImageLinkMini( playlist.getThumbnail() , link -> {
+                    Picasso.get().load(link).into(cover);
+                });
+
             }
         }
 
@@ -197,9 +201,9 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
         shuffleBtn.setOnClickListener(shuffleOnClickListener());
         downloadIcon.setOnClickListener(downloadOnClickListener());
         if(DownloadsRepository.isDownloaded(playlist)){
-            downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_downloaded));
+            downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_downloadeded_true));
         }else{
-            downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_download_false));
+            downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_downloaded_false));
         }
         if (currentUserID.equals(playlist.getOwnerID())) {
             overflowMenu.setOnClickListener(overflowMenuOnClickListener());
@@ -217,6 +221,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
             followBtn.setVisibility(View.GONE);
             return;
         }
+        //TODO: reduce document calls
         PlaylistRepository.getAllPlaylists(currentUserID, task -> {
             for (QueryDocumentSnapshot document : task) {
                 if (isFromFirebase) {
@@ -241,11 +246,11 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
 
             String username = playlist.getOwnerUsername();
             String trackLength = playlist.getSongs().size() + "";
-            String playlistLength = playlist.getPlaylistLength();
+            String playlistLength = playlist.playlistLength();
             subtitle.setText("By " + username + " · " + trackLength + " songs · " + playlistLength);
 
         } else {
-            subtitle.setText("By Arifzefen · " + playlist.getSongs().size() + " songs · " + playlist.getPlaylistLength());
+            subtitle.setText("By Arifzefen · " + playlist.getSongs().size() + " songs · " + playlist.playlistLength());
         }
 
     }
@@ -262,7 +267,13 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
             newPlaylist.setThumbnail(playlist.getThumbnail());
             PlaylistRepository.followPlaylist(ownerID, newPlaylist);
         } else {
-            PlaylistRepository.unFollowPlaylist(ownerID, playlist);
+            Dialogs.simpleTextConfirmationDialog(getContext(),"Unfollow Playlist?","Unfollow",()->{
+                PlaylistRepository.unFollowPlaylist(ownerID, playlist);
+                if(DownloadsRepository.isDownloaded(playlist)){
+                    DownloadsRepository.deleteDownload(playlist,getActivity());
+                    downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_downloaded_false));
+                }
+            });
         }
         isFollowing = !isFollowing;
         setIsFollowingDesign();
@@ -304,6 +315,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
                                 }
                                 playlist = resBookSearch.body();
                                 playlist.setOwnerID(firstPath + "/" + secondPath);
+                                playlist.setId(firstPath + "/" + secondPath);
                                 playlist.setFromFirebase(false);
                                 setupViews();
                                 for (Song song : playlist.getSongs()) {
@@ -337,15 +349,26 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
     private View.OnClickListener downloadOnClickListener() {
         return v->{
             if(DownloadsRepository.isDownloaded(playlist)){
-                Utility.deleteDownloadPlaylist(getContext(),()->{
-                    downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_download_false));
+                Dialogs.simpleTextConfirmationDialog(getContext(),"Delete Downloaded Songs?","Delete",()->{
+                    downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_downloaded_false));
                     DownloadsRepository.deleteDownload(playlist,getActivity());
-                    getActivity().runOnUiThread(()->{
-                        (new Handler()).postDelayed(() -> adapter.notifyDataSetChanged(), 500);
-                    });
+                        (new Handler()).postDelayed(() -> adapter.notifyDataSetChanged(), 2000);
                 });
             }else{
-                downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_downloaded));
+                if (!isFollowing && !playlist.getOwnerID().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                    Playlist newPlaylist = new Playlist();
+                    newPlaylist.setId(playlist.getId());
+                    newPlaylist.setTitle(playlist.getTitle());
+                    newPlaylist.setOwnerID(ownerID);
+                    newPlaylist.setOwnerUsername(playlist.getOwnerUsername());
+                    newPlaylist.setFromFirebase(isFromFirebase);
+                    newPlaylist.setSongs(new ArrayList<>());
+                    newPlaylist.setThumbnail(playlist.getThumbnail());
+                    PlaylistRepository.followPlaylist(ownerID, newPlaylist);
+                    isFollowing = true;
+                    setIsFollowingDesign();
+                }
+                downloadIcon.setImageDrawable(getContext().getDrawable(R.drawable.ic_downloadeded_true));
                 DownloadsRepository.downloadPlaylist(playlist,getActivity());
             }
         };
@@ -361,7 +384,7 @@ public class PlaylistItemFragment extends Fragment implements SongAdapter.ItemCl
 
     @Override
     public void onSongItemClick(View view, int position) {
-        MainActivity.playSong(position, songs, shuffled);
+        MainActivity.playSong(position, songs, null);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {

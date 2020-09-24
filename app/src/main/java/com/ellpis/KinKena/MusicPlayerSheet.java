@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -131,7 +132,6 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     @BindView(R.id.card_queue_rv)
     RecyclerView queueRV;
     public static ConcatenatingMediaSource concatenatedSource;
-    private boolean shuffled;
     public static ArrayList<Song> queue;
     static Bitmap bitmap;
     String ArifzefenSongPath = "http://www.arifzefen.com/json/playSong.php?id=";
@@ -143,15 +143,26 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     private QueueAdapter queueAdapter;
     private ItemTouchHelper mItemTouchHelper;
     public static List<TrackChangeListener> mTrackChangeListener = new ArrayList<>();
+    private final String SHUFFLE_KEY = "SHUFFLE_KEY";
 
-    public static MusicPlayerSheet newInstance(int currentWindow, ArrayList<Song> playlist, boolean shuffled) {
+    public static MusicPlayerSheet newInstance(int currentWindow, ArrayList<Song> playlist, Boolean shuffled) {
+        MusicPlayerSheet myFragment = new MusicPlayerSheet();
+        Bundle args = new Bundle();
+        args.putBoolean("shuffleChanged", true);
+        args.putParcelableArrayList("playlist", playlist);
+        args.putInt("currentWindow", currentWindow);
+        args.putBoolean("shuffled", shuffled);
+        myFragment.setArguments(args);
+
+        return myFragment;
+    }
+
+    public static MusicPlayerSheet newInstance(int currentWindow, ArrayList<Song> playlist) {
         MusicPlayerSheet myFragment = new MusicPlayerSheet();
         Bundle args = new Bundle();
         args.putParcelableArrayList("playlist", playlist);
-        args.putBoolean("shuffled", shuffled);
         args.putInt("currentWindow", currentWindow);
         myFragment.setArguments(args);
-
         return myFragment;
     }
 
@@ -159,7 +170,11 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         queue = getArguments().getParcelableArrayList("playlist");
-        shuffled = getArguments().getBoolean("shuffled");
+
+        //update the shufflekey
+       if(getArguments().getBoolean("shuffleChanged")){
+           setShuffleKey(getArguments().getBoolean("shuffled"));
+       }
         currentWindow = getArguments().getInt("currentWindow");
 
     }
@@ -184,28 +199,33 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         miniArtist.setText(song.getArtistName());
         titleControl.setText(song.getSongName());
         artistControl.setText(song.getArtistName());
-        Picasso.get().load("http://www.arifzefen.com" + song.getThumbnail()).into(cover);
-        Picasso.get().load("http://www.arifzefen.com" + queue.get(ForegroundService.player.getCurrentWindowIndex()).getThumbnail()).into(new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
-                    public void onGenerated(Palette p) {
-                        playerBackground.setBackgroundColor(Utility.manipulateColor(p.getDominantColor(getResources().getColor(R.color.on_top_background)), 0.6f));
-                        miniPlayerBackground.setBackgroundColor(Utility.manipulateColor(p.getDominantColor(getResources().getColor(R.color.on_top_background)), 0.6f));
-                        MusicPlayerSheet.bitmap = bitmap;
-                    }
-                });
+        Utility.getImageLinkMini(  song.getThumbnail(), link -> {
+            Picasso.get().load(link).into(cover);
+        });
+        Utility.getImageLinkMini( queue.get(ForegroundService.player.getCurrentWindowIndex()).getThumbnail(), link -> {
+            Picasso.get().load(link).into(new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                        public void onGenerated(Palette p) {
+                            playerBackground.setBackgroundColor(Utility.manipulateColor(p.getVibrantColor(getResources().getColor(R.color.on_top_background)), 0.6f));
+                            miniPlayerBackground.setBackgroundColor(Utility.manipulateColor(p.getVibrantColor(getResources().getColor(R.color.on_top_background)), 0.6f));
+                            MusicPlayerSheet.bitmap = bitmap;
+                        }
+                    });
 
-            }
+                }
 
-            @Override
-            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-            }
+                @Override
+                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                }
 
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
 
-            }
+                }
+            });
+
         });
 
 
@@ -214,9 +234,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
 
 
     private ConcatenatingMediaSource getConcatenatingMediaSource() {
-        if (shuffled) {
-            Collections.shuffle(queue);
-        }
+
         concatenatedSource = new ConcatenatingMediaSource();
         for (int i = 0; i < queue.size(); i++) {
             concatenatedSource.addMediaSource(buildMediaSource(Uri.parse(ArifzefenSongPath + queue.get(i).getSongId()), i));
@@ -268,6 +286,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
         ConcatenatingMediaSource concatenatingMediaSource = getConcatenatingMediaSource();
         ForegroundService.player.setPlayWhenReady(playWhenReady);
         ForegroundService.player.seekTo(currentWindow, playbackPosition);
+        ForegroundService.player.setShuffleModeEnabled(getShuffleKey());
         ForegroundService.player.prepare(concatenatingMediaSource, false, false);
         ForegroundService.player.setAudioAttributes(audioFocus(), true);
         ForegroundService.player.setWakeMode(C.WAKE_MODE_NETWORK);
@@ -447,11 +466,22 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
             setRepeatMode();
         });
         shuffleControl.setOnClickListener(v -> {
+            setShuffleKey(!ForegroundService.player.getShuffleModeEnabled());
             ForegroundService.player.setShuffleModeEnabled(!ForegroundService.player.getShuffleModeEnabled());
             setShuffleMode();
         });
     }
-
+private void setShuffleKey(boolean shuffled){
+    SharedPreferences sharedPref = getActivity().getSharedPreferences(
+            SHUFFLE_KEY, Context.MODE_PRIVATE);
+    SharedPreferences.Editor editor = sharedPref.edit();
+    editor.putBoolean(SHUFFLE_KEY, shuffled);
+    editor.apply();
+}
+    private boolean getShuffleKey(){
+       return  getActivity().getSharedPreferences(
+                SHUFFLE_KEY, Context.MODE_PRIVATE).getBoolean(SHUFFLE_KEY, false);
+    }
     private void setPlayPause(boolean play) {
         if (play) {
             playpauseControl.setImageDrawable(getActivity().getDrawable(R.drawable.exo_controls_play));
@@ -590,6 +620,11 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
     }
 
     @Override
+    public void onPlayerError(ExoPlaybackException error) {
+        ForegroundService.player.retry();
+    }
+
+    @Override
     public void onScrubStart(TimeBar timeBar, long position) {
         curTimeChronometer.setBase(SystemClock.elapsedRealtime() - position);
         ForegroundService.player.setPlayWhenReady(false);
@@ -700,7 +735,7 @@ public class MusicPlayerSheet extends Fragment implements TimeBar.OnScrubListene
 
     public void download(Song song) {
         DownloadRequest downloadRequest = new DownloadRequest(
-                song.getId(),
+                song.getSongId()+"",
                 DownloadRequest.TYPE_PROGRESSIVE,
                 Uri.parse(ArifzefenSongPath + song.getSongId()),
                 /* streamKeys= */ Collections.emptyList(),

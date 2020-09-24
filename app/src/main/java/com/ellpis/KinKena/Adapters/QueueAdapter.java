@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.ellpis.KinKena.ForegroundService;
 import com.ellpis.KinKena.Objects.Song;
+import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.R;
 import com.ellpis.KinKena.helper.ItemTouchHelperAdapter;
 import com.squareup.picasso.Picasso;
@@ -113,8 +114,11 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull QueueAdapter.ViewHolder viewHolder, int i) {
-        Picasso.get().load("http://www.arifzefen.com" + songList.get(i).getThumbnail())
-                .into(viewHolder.songCoverImage);
+        Utility.getImageLinkMini( songList.get(i).getThumbnail(), link -> {
+            Picasso.get().load(link)
+                    .into(viewHolder.songCoverImage);
+        });
+
 
         viewHolder.songCoverImage.setAdjustViewBounds(true);
         viewHolder.title.setText(songList.get(i).getSongName());

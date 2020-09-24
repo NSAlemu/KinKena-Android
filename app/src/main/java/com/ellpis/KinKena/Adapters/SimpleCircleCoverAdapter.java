@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ellpis.KinKena.Objects.Album;
+import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.R;
 import com.squareup.picasso.Picasso;
 
@@ -89,8 +90,9 @@ public class SimpleCircleCoverAdapter  extends RecyclerView.Adapter<SimpleCircle
     @Override
     public void onBindViewHolder(@NonNull SimpleCircleCoverAdapter.ViewHolder viewHolder, int i) {
         try {
-
-            Picasso.get().load("http://www.arifzefen.com"+ albumList.get(i).getAlbumPurl()).into(viewHolder.coverImage);
+            Utility.getImageLinkMini( albumList.get(i).getAlbumPurl(), link -> {
+                Picasso.get().load(link).into(viewHolder.coverImage);
+            });
         }catch (Exception e){
             Picasso.get().load(R.drawable.ic_library_music_black_24dp).into(viewHolder.coverImage);
         }

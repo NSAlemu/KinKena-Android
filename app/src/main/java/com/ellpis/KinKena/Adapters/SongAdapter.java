@@ -2,7 +2,6 @@ package com.ellpis.KinKena.Adapters;
 
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -25,15 +24,11 @@ import com.ellpis.KinKena.Objects.AddToPlaylistBottomSheet;
 import com.ellpis.KinKena.Objects.Song;
 import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.R;
-import com.ellpis.KinKena.SongDownloadService;
-import com.google.android.exoplayer2.offline.DownloadRequest;
-import com.google.android.exoplayer2.offline.DownloadService;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,8 +127,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull SongAdapter.ViewHolder viewHolder, int i) {
         Uri songUri = Uri.parse("http://www.arifzefen.com/json/playSong.php?id=" + songList.get(i).getSongId());
-        Picasso.get().load("http://www.arifzefen.com" + songList.get(i).getThumbnail())
-                .into(viewHolder.songCoverImage);
+        Utility.getImageLinkMini( songList.get(i).getThumbnail(), link -> {
+            Picasso.get().load(link)
+                    .into(viewHolder.songCoverImage);
+        });
+
 
         viewHolder.songCoverImage.setAdjustViewBounds(true);
         viewHolder.title.setText(songList.get(i).getSongName());
@@ -150,6 +148,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
         if (isSongQueueForDownload(songUri)) {
             viewHolder.downloadIcon.setImageDrawable(viewHolder.downloadIcon.getContext().getDrawable(R.drawable.ic_download_queued));
+            viewHolder.downloadIcon.setVisibility(View.VISIBLE);
+        }
+        if (isSongDownloading(songUri)) {
+            viewHolder.downloadIcon.setImageDrawable(viewHolder.downloadIcon.getContext().getDrawable(R.drawable.ic_loading));
             viewHolder.downloadIcon.setVisibility(View.VISIBLE);
         }
         viewHolder.overflowMenu.setOnClickListener(new View.OnClickListener() {
@@ -172,14 +174,20 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
     private boolean isSongQueueForDownload(Uri songUri) {
         return MainActivity.songDownloadApplication.getDownloadTracker().isQueuedForDownloaded(songUri);
     }
+    private boolean isSongDownloading(Uri songUri) {
+        return MainActivity.songDownloadApplication.getDownloadTracker().isDownloading(songUri);
+    }
 
     void showBottomSheet(ViewHolder viewHolder, int i) {
         View view = ((FragmentActivity) viewHolder.overflowMenu.getContext()).getLayoutInflater().inflate(R.layout.card_song_overflow_menu_bottomsheet, null);
 
         ((TextView) view.findViewById(R.id.card_song_menu_title)).setText(songList.get(i).getSongName());
         ((TextView) view.findViewById(R.id.card_song_menu_artist)).setText(songList.get(i).getArtistName());
-        Picasso.get().load("http://www.arifzefen.com" + songList.get(i).getThumbnail())
-                .into(((ImageView) view.findViewById(R.id.card_song_menu_cover)));
+        Utility.getImageLinkMini( songList.get(i).getThumbnail(), link -> {
+            Picasso.get().load(link )
+                    .into(((ImageView) view.findViewById(R.id.card_song_menu_cover)));
+        });
+
 
         ((LinearLayout) view.findViewById(R.id.card_song_menu_like)).setOnClickListener((View.OnClickListener) v -> Toast.makeText(v.getContext(), songList.get(i).getSongName() + " liked", Toast.LENGTH_LONG).show());
 //        ((TextView) );

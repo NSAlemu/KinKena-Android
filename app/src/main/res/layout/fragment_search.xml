@@ -146,6 +146,7 @@
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:overScrollMode="never"
             app:layout_constraintTop_toBottomOf="@+id/search_recent" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -156,6 +157,7 @@
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:overScrollMode="never"
             app:layout_constraintTop_toBottomOf="@+id/search_recent" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -166,6 +168,7 @@
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:overScrollMode="never"
             app:layout_constraintTop_toBottomOf="@+id/search_recent" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -176,6 +179,7 @@
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:overScrollMode="never"
             app:layout_constraintTop_toBottomOf="@+id/search_recent" />
 
         <TextView

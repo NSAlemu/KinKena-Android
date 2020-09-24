@@ -48,6 +48,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:overScrollMode="never"
             app:layout_constraintTop_toBottomOf="@+id/card_queue_title" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -93,35 +94,38 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp">
+                android:layout_height="60dp"
+                android:background="@color/colorPrimaryDark">
 
-                <TextView
-                    android:id="@+id/miniplayer_title"
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="72dp"
-                    android:layout_marginTop="6dp"
-                    android:maxLines="1"
-                    android:text="Fikirsh New Yegodagne"
-                    android:textColor="@color/White"
-                    android:textStyle="bold"
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/mini_player_play_pause"
-                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <TextView
-                    android:id="@+id/miniplayer_artist"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:maxLines="1"
-                    android:text="Tilahun Gessese"
-                    android:textColor="@color/White"
-                    app:layout_constraintEnd_toStartOf="@+id/mini_player_play_pause"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="@+id/miniplayer_title"
-                    app:layout_constraintTop_toBottomOf="@+id/miniplayer_title" />
+                    <TextView
+                        android:id="@+id/miniplayer_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:maxLines="1"
+                        android:text="Fikirsh New Yegodagne"
+                        android:textColor="@color/White"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/miniplayer_artist"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="Tilahun Gessese"
+                        android:textColor="@color/White"
+                        android:textSize="12sp" />
+                </LinearLayout>
 
                 <ImageButton
                     android:id="@+id/mini_player_play_pause"
@@ -213,7 +217,7 @@
                 <ImageButton
                     android:id="@+id/exoplayer_previous"
                     android:layout_width="wrap_content"
-                    android:layout_height="0dp"
+                    android:layout_height="40dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
                     android:adjustViewBounds="true"
@@ -245,7 +249,7 @@
                 <ImageButton
                     android:id="@+id/exoplayer_next"
                     android:layout_width="wrap_content"
-                    android:layout_height="0dp"
+                    android:layout_height="40dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
                     android:adjustViewBounds="true"
@@ -269,13 +273,18 @@
                     android:id="@+id/exoplayer_shuffle"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
-                    android:layout_marginTop="2dp"
-                    android:layout_marginBottom="2dp"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
                     android:adjustViewBounds="true"
                     android:background="?android:attr/selectableItemBackground"
+                    android:cropToPadding="true"
+                    android:padding="2dp"
+                    android:scaleType="centerCrop"
                     android:src="@drawable/ic_shuffle"
                     app:layout_constraintBottom_toBottomOf="@+id/exoplayer_previous"
                     app:layout_constraintEnd_toStartOf="@+id/exoplayer_previous"
+                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/exoplayer_previous" />
 
@@ -283,13 +292,16 @@
                     android:id="@+id/exoplayer_repeat"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
-                    android:layout_marginTop="2dp"
-                    android:layout_marginBottom="2dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginBottom="8dp"
                     android:adjustViewBounds="true"
                     android:background="?android:attr/selectableItemBackground"
+                    android:scaleType="centerCrop"
                     android:src="@drawable/exo_controls_repeat_off"
                     app:layout_constraintBottom_toBottomOf="@+id/exoplayer_next"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toEndOf="@+id/exoplayer_next"
                     app:layout_constraintTop_toTopOf="@+id/exoplayer_next" />
 
@@ -304,8 +316,8 @@
                     android:id="@+id/exoplayer_queue"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
-                    android:layout_marginEnd="24dp"
-                    android:layout_marginBottom="24dp"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginBottom="32dp"
                     android:adjustViewBounds="true"
                     android:background="?android:attr/selectableItemBackground"
                     android:backgroundTint="@color/Transparent"
@@ -321,8 +333,8 @@
                     android:id="@+id/imageView2"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginBottom="24dp"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginBottom="32dp"
                     android:adjustViewBounds="true"
                     android:background="?android:attr/selectableItemBackground"
                     android:scaleType="centerInside"

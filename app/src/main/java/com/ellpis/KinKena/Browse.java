@@ -1,6 +1,7 @@
 package com.ellpis.KinKena;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,6 +49,7 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         getFromFirebase();
+
     }
 
     private void getFromFirebase() {
@@ -98,6 +100,7 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
 
         insertPoint.addView(headerView);
         RecyclerView rv = new RecyclerView(getContext());
+        rv.setOverScrollMode(View.OVER_SCROLL_NEVER);
         AlbumArtAdapter albumArtAdapter = new AlbumArtAdapter(browseItems.getPlaylists());
         albumArtAdapter.setClickListener(this);
         rv.setAdapter(albumArtAdapter);
@@ -113,6 +116,7 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
         insertPoint.addView(headerView);
 
         RecyclerView rv = new RecyclerView(getContext());
+        rv.setOverScrollMode(View.OVER_SCROLL_NEVER);
         AlbumArtHorizAdapter albumArtHorizAdapter = new AlbumArtHorizAdapter(browseItems.getPlaylists());
         albumArtHorizAdapter.setClickListener(this);
         rv.setAdapter(albumArtHorizAdapter);
@@ -127,6 +131,7 @@ public class Browse extends Fragment implements AlbumArtAdapter.ItemClickListene
 
         insertPoint.addView(headerView);
         RecyclerView rv = new RecyclerView(getContext());
+        rv.setOverScrollMode(View.OVER_SCROLL_NEVER);
         AlbumArtAdapter albumArtAdapter = new AlbumArtAdapter(browseItems.getPlaylists());
         albumArtAdapter.setClickListener(this);
         rv.setAdapter(albumArtAdapter);

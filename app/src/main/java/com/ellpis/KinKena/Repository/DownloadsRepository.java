@@ -88,9 +88,7 @@ public class DownloadsRepository {
         if (songDownloadCount == 0) {
             downloadSong(songId);
         }
-        Log.e("TAG", "removeFromAllDownloads:started at "+songDownloadCount);
         editor.putInt(songId, ++songDownloadCount);
-        Log.e("TAG", "removeFromAllDownloads:ended at  "+songDownloadCount);
         editor.apply();
         return songDownloadCount;
     }
@@ -99,9 +97,7 @@ public class DownloadsRepository {
         SharedPreferences sharedPref = MainActivity.context.getSharedPreferences("All_downloads", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         int songDownloadCount = sharedPref.getInt(songId, 0);
-        Log.e("TAG", "removeFromAllDownloads:started at "+songDownloadCount);
         editor.putInt(songId, --songDownloadCount);
-        Log.e("TAG", "removeFromAllDownloads:ended at  "+songDownloadCount);
         if (songDownloadCount == 0) {
             deleteSong(songId);
         }

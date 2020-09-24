@@ -59,7 +59,7 @@ public class SongDownloadService extends DownloadService {
         return MainActivity.songDownloadApplication
                 .getDownloadNotificationHelper()
                 .buildProgressNotification(
-                        R.drawable.ic_logo, /* contentIntent= */ null, /* message= */ null, downloads);
+                        R.drawable.kinkena_logo_mini, /* contentIntent= */ null, /* message= */ null, downloads);
     }
 
 

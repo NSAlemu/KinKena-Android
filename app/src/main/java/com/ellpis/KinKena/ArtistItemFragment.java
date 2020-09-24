@@ -222,7 +222,7 @@ public class ArtistItemFragment extends Fragment implements SongAdapter.ItemClic
 
     @Override
     public void onSongItemClick(View view, int position) {
-        MainActivity.playSong(position, (ArrayList<Song>) topTrackList, false);
+        MainActivity.playSong(position, (ArrayList<Song>) topTrackList, null);
     }
 
     @Override

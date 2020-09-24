@@ -58,9 +58,12 @@ public class PlaylistBottomSheet extends BottomSheetDialog{
                     .placeholder(R.drawable.ic_library_music_black_24dp)
                     .into(cover);
         }else{
-            Picasso.get().load("http://www.arifzefen.com" + playlist.getThumbnail())
-                    .placeholder(R.drawable.ic_library_music_black_24dp)
-                    .into(cover);
+            Utility.getImageLinkMini(playlist.getThumbnail(), link -> {
+                Picasso.get().load(link)
+                        .placeholder(R.drawable.ic_library_music_black_24dp)
+                        .into(cover);
+            });
+
         }
         if(playlist.isPrivacy()){
             privacy.setText("Make Playlist Public");
@@ -78,13 +81,13 @@ public class PlaylistBottomSheet extends BottomSheetDialog{
 
     private View.OnClickListener renamePlaylistOnclick(){
         return v -> {
-            Utility.renamePlaylist(parentFragment, playlist);
+            Dialogs.renamePlaylist(parentFragment, playlist);
             this.dismiss();
         };
     }
     private View.OnClickListener deletePlaylistOnclick(){
         return v -> {
-            Utility.deletePlaylist(parentFragment, playlist);
+            Dialogs.deletePlaylist(parentFragment, playlist);
             this.dismiss();
         };
     }

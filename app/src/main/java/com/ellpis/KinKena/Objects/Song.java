@@ -9,8 +9,7 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
 public class Song implements Serializable, Parcelable {
-    @DocumentId
-    String id;
+
     @SerializedName("artistId")
     private Integer artistId;
     @SerializedName("artistName")
@@ -112,13 +111,6 @@ public class Song implements Serializable, Parcelable {
         this.thumbnail = thumbnail;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     @Override
     public String toString() {
@@ -136,7 +128,6 @@ public class Song implements Serializable, Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.id);
         dest.writeValue(this.artistId);
         dest.writeString(this.artistName);
         dest.writeValue(this.songId);
@@ -153,7 +144,6 @@ public class Song implements Serializable, Parcelable {
     }
 
     protected Song(Parcel in) {
-        this.id = in.readString();
         this.artistId = (Integer) in.readValue(Integer.class.getClassLoader());
         this.artistName = in.readString();
         this.songId = (Integer) in.readValue(Integer.class.getClassLoader());

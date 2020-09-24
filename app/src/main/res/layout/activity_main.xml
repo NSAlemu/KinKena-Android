@@ -41,16 +41,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/main_notification_bar" />
-        <fragment
-            android:id="@+id/main_fragment_search_container"
-            class="com.ellpis.KinKena.SearchFragment"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/main_bottom_nav_guideline"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/main_notification_bar" />
 
         <fragment
             android:id="@+id/main_fragment_browse_container"
@@ -59,6 +49,17 @@
             android:layout_height="0dp"
             android:visibility="visible"
             app:layout_constraintBottom_toTopOf="@+id/main_bottom_nav_guideline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/main_notification_bar" />
+
+        <fragment
+            android:id="@+id/main_fragment_search_container"
+            class="com.ellpis.KinKena.SearchFragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/main_bottom_nav_guideline"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/main_notification_bar" />
@@ -109,7 +110,6 @@
             android:layout_gravity="start"
             android:background="@color/background"
             app:itemIconSize="24dp"
-            app:itemIconTint="@color/nav_bar_selector"
             app:labelVisibilityMode="unlabeled"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

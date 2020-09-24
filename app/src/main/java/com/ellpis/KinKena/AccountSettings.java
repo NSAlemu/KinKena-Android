@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.ellpis.KinKena.Objects.Dialogs;
 import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.Repository.SearchRepository;
 import com.ellpis.KinKena.Repository.CloudStorageRepository;
@@ -97,7 +98,7 @@ public class AccountSettings extends Fragment {
 
     private View.OnClickListener changeUsernameOnClick() {
         return v -> {
-            Utility.changeUsername(this);
+            Dialogs.changeUsername(this);
         };
     }
     private View.OnClickListener changeImageOnClick() {

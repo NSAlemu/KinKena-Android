@@ -1,6 +1,5 @@
 package com.ellpis.KinKena.Repository;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.widget.Toast;
@@ -9,9 +8,8 @@ import androidx.fragment.app.Fragment;
 
 import com.algolia.search.saas.Client;
 import com.algolia.search.saas.Index;
+import com.ellpis.KinKena.Objects.Dialogs;
 import com.ellpis.KinKena.Objects.Playlist;
-import com.ellpis.KinKena.Objects.Song;
-import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -21,10 +19,6 @@ import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class PlaylistRepository {
     public static final String PLAYLIST_DOWNLOAD_ID="PLAYLIST_DOWNLOAD";
@@ -59,7 +53,7 @@ public class PlaylistRepository {
 
         if (newName.isEmpty()) {
             Toast.makeText(fragment.getContext(), "Name cannot be empty", Toast.LENGTH_LONG).show();
-            Utility.renamePlaylist(fragment, playlist);
+            Dialogs.renamePlaylist(fragment, playlist);
             return;
         }
         db.collection("Users").document(currentUserID).collection("Playlists")

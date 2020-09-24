@@ -86,7 +86,7 @@
                 android:fontFamily="@font/montserrat"
                 android:maxLines="1"
                 android:text="TextView"
-                app:layout_constraintEnd_toStartOf="@+id/search_song_overflow_menu"
+                app:layout_constraintEnd_toStartOf="@+id/queue_item_drag"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/cardView2"
                 app:layout_constraintTop_toTopOf="parent" />

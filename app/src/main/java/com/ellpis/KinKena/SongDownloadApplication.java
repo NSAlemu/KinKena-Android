@@ -63,7 +63,7 @@ public class SongDownloadApplication extends Application {
     Context context;
     private DatabaseProvider databaseProvider;
     private File downloadDirectory;
-    private Cache downloadCache;
+    public Cache downloadCache;
     private DownloadManager downloadManager;
     private DownloadTracker downloadTracker;
     private DownloadNotificationHelper downloadNotificationHelper;
@@ -204,4 +204,6 @@ public class SongDownloadApplication extends Application {
                 CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR,
                 /* eventListener= */ null);
     }
+
+
 }

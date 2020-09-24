@@ -1,8 +1,6 @@
 package com.ellpis.KinKena.Adapters;
 
-import android.app.Activity;
 import android.content.Context;
-import android.net.Uri;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -14,8 +12,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.ellpis.KinKena.MainActivity;
 import com.ellpis.KinKena.Objects.Playlist;
+import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.R;
 import com.ellpis.KinKena.Repository.DownloadsRepository;
 import com.squareup.picasso.Picasso;
@@ -110,9 +108,12 @@ public class PlaylistTabAdapter extends RecyclerView.Adapter<PlaylistTabAdapter.
                     .placeholder(R.drawable.ic_library_music_black_24dp)
                     .into(viewHolder.songCoverImage);
         }else{
-            Picasso.get().load("http://www.arifzefen.com" + playlists.get(i).getThumbnail())
-                    .placeholder(R.drawable.ic_library_music_black_24dp)
-                    .into(viewHolder.songCoverImage);
+            Utility.getImageLinkMini( playlists.get(i).getThumbnail(), link -> {
+                Picasso.get().load(link )
+                        .placeholder(R.drawable.ic_library_music_black_24dp)
+                        .into(viewHolder.songCoverImage);
+            });
+
         }
 
 

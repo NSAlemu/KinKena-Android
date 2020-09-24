@@ -13,7 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ellpis.KinKena.Objects.MiniPlaylist;
-import com.ellpis.KinKena.Objects.Playlist;
+import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.R;
 import com.squareup.picasso.Picasso;
 
@@ -99,8 +99,10 @@ public class AlbumArtHorizAdapter extends RecyclerView.Adapter<AlbumArtHorizAdap
     @Override
     public void onBindViewHolder(@NonNull AlbumArtHorizAdapter.ViewHolder viewHolder, int i) {
         try {
+            Utility.getImageLinkMini(songList.get(i).getThumbnail(), link -> {
+                Picasso.get().load(link).into(viewHolder.songCoverImage);
 
-            Picasso.get().load("http://www.arifzefen.com"+songList.get(i).getThumbnail()).into(viewHolder.songCoverImage);
+            });
         }catch (Exception e){
             Picasso.get().load(R.drawable.ic_library_music_black_24dp).into(viewHolder.songCoverImage);
         }

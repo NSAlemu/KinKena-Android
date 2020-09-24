@@ -4,6 +4,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         songDownloadApplication.getDownloadManager().resumeDownloads();
 //        Log.e("TAG", "demoApplication: "+demoApplication.getDownloadManager().addDownload(););
         bottomNavigationView = findViewById(R.id.main_bottom_nav);
+        bottomNavigationView.setItemIconTintList(null);
         guideLine = findViewById(R.id.main_bottom_nav_guideline);
         ConstraintLayout.LayoutParams guideLineParams = (ConstraintLayout.LayoutParams) guideLine.getLayoutParams();
         guideLineMaxheight = guideLineParams.guideEnd;
@@ -117,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         int displayheight = displayMetrics.heightPixels;
 
         int minWidth = findViewById(R.id.mini_player).getHeight();
-        int maxWidth = 0;
+        int maxWidth;
         if (findViewById(R.id.miniplsyer_image_end_params).getWidth() > findViewById(R.id.miniplsyer_image_end_params).getHeight())
             maxWidth = findViewById(R.id.miniplsyer_image_end_params).getHeight();
         else
@@ -161,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static void playSong(int playbackPosition, ArrayList<Song> playlist, boolean shuffled) {
+    public static void playSong(int playbackPosition, ArrayList<Song> playlist, Boolean shuffled) {
         if (playlist == null || playbackPosition >= playlist.size() || playlist.size() == 0) {
             return;
         }
@@ -169,7 +171,8 @@ public class MainActivity extends AppCompatActivity {
         sheetBehavior = BottomSheetBehavior.from(context.findViewById(R.id.constraintLayout));
 
         sheetBehavior.addBottomSheetCallback(bottomSheetCallback);
-        musicPlayer = MusicPlayerSheet.newInstance(playbackPosition, playlist, shuffled);
+        musicPlayer = shuffled == null ?  MusicPlayerSheet.newInstance(playbackPosition, playlist) :
+                MusicPlayerSheet.newInstance(playbackPosition, playlist, shuffled);
         manager.beginTransaction().replace(R.id.main_fragment_music_player_container, musicPlayer).commit();
     }
 
@@ -220,6 +223,10 @@ public class MainActivity extends AppCompatActivity {
     private void prepareUsername() {
         currentUserID = FirebaseAuth.getInstance().getUid();
         UserRepository.getUser(currentUserID, task -> {
+            if(task.get("username")==null){
+                username = "test";
+            }
+            else
             username = task.get("username").toString();
 
         });
@@ -248,25 +255,12 @@ public class MainActivity extends AppCompatActivity {
         if (sheetBehavior != null && sheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         } else if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-            new MaterialAlertDialogBuilder(context)
-                    .setTitle("You are about to leave the App")
-                    .setPositiveButton("Leave", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            finish();
-                            System.exit(0);
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    })
-                    .setBackground(getResources().getDrawable(R.drawable.dialog_backgound))
-                    .show();
+            Intent startMain = new Intent(Intent.ACTION_MAIN);
+            startMain.addCategory(Intent.CATEGORY_HOME);
+            startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(startMain);
         } else {
-            super.onBackPressed();
+            getSupportFragmentManager().popBackStack();
         }
 
 
@@ -285,6 +279,9 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onAvailable(Network network) {
                             MainActivity.this.runOnUiThread(() -> {
+                                if(MusicPlayerSheet.queue!=null && MusicPlayerSheet.queue.size()>0){
+//                                    ForegroundService.player.retry();
+                                }
                                 findViewById(R.id.main_notification_bar).setVisibility(View.GONE);
                                 songDownloadApplication.getDownloadManager().resumeDownloads();
                             });
@@ -467,6 +464,11 @@ public class MainActivity extends AppCompatActivity {
         return map;
     }
 
+    @Override
+    protected void onDestroy() {
+        songDownloadApplication.downloadCache.release();
+        super.onDestroy();
+    }
 }
 
 

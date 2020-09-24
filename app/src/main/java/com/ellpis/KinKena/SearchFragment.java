@@ -260,7 +260,7 @@ public class SearchFragment extends Fragment implements SongAdapter.ItemClickLis
         this.onPause();
         searchview.clearFocus();
         searchRepository.addToList(songList.get(position));
-        MainActivity.playSong(position, songList, false);
+        MainActivity.playSong(position, songList, null);
     }
 
 

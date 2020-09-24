@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.ellpis.KinKena.MainActivity;
 import com.ellpis.KinKena.Objects.Album;
 import com.ellpis.KinKena.Objects.Song;
+import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.R;
 import com.squareup.picasso.Picasso;
 
@@ -106,8 +107,11 @@ public class AlbumListAdapter  extends RecyclerView.Adapter<AlbumListAdapter.Vie
     @Override
     public void onBindViewHolder(@NonNull AlbumListAdapter.ViewHolder viewHolder, int i) {
         try {
+            Utility.getImageLinkMini(albumList.get(i).getAlbumPurl(), link -> {
+                Picasso.get().load(link )
+                        .into(viewHolder.albumCoverImage);
 
-            Picasso.get().load("http://www.arifzefen.com"+ albumList.get(i).getAlbumPurl()).into(viewHolder.albumCoverImage);
+            });
         }catch (Exception e){
             Picasso.get().load(R.drawable.ic_library_music_black_24dp).into(viewHolder.albumCoverImage);
         }
@@ -128,7 +132,7 @@ public class AlbumListAdapter  extends RecyclerView.Adapter<AlbumListAdapter.Vie
             public void onSongItemClick(View view, int position) {
                 ArrayList<Song> newSongList = new ArrayList<>();
                 newSongList.addAll(albumList.get(i).getSongs());
-                MainActivity.playSong(position, newSongList, false);
+                MainActivity.playSong(position, newSongList, null);
             }
         });
 //        viewHolder.recyclerView.setNestedScrollingEnabled(false);

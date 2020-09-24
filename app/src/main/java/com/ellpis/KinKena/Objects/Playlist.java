@@ -81,7 +81,7 @@ public class Playlist implements Serializable {
         this.ownerID = ownerID;
     }
 
-    public String getPlaylistLength() {
+    public String playlistLength() {
         int songLength = 0;
         for (Song song : getSongs()) {
             songLength += song.getPlaytime();

@@ -11,6 +11,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.ellpis.KinKena.Objects.Utility;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerNotificationManager;
@@ -54,7 +55,7 @@ public class ForegroundService extends Service {
                     }
                 });
         playerNotificationManager.setMediaSessionToken(MusicPlayerSheet.mediaSessionConnector.mediaSession.getSessionToken());
-        playerNotificationManager.setSmallIcon(R.mipmap.ic_launcher);
+        playerNotificationManager.setSmallIcon(R.drawable.kinkena_logo_mini);
         playerNotificationManager.setPlayer(player);
         Log.d("TAG", "onStartCommand: ");
         return START_NOT_STICKY;
@@ -83,22 +84,25 @@ public class ForegroundService extends Service {
             @Nullable
             @Override
             public Bitmap getCurrentLargeIcon(Player player, PlayerNotificationManager.BitmapCallback callback) {
-                Picasso.get().load("http://www.arifzefen.com" + MusicPlayerSheet.queue.get(player.getCurrentWindowIndex()).getThumbnail()).into(new Target() {
-                    @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        callback.onBitmap(bitmap);
+                Utility.getImageLinkMini(  MusicPlayerSheet.queue.get(player.getCurrentWindowIndex()).getThumbnail(), link -> {
+                    Picasso.get().load(link).into(new Target() {
+                        @Override
+                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                            callback.onBitmap(bitmap);
 
-                    }
+                        }
 
-                    @Override
-                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                        @Override
+                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
 
-                    }
+                        }
 
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+                        @Override
+                        public void onPrepareLoad(Drawable placeHolderDrawable) {
 
-                    }
+                        }
+                    });
+
                 });
                 return MusicPlayerSheet.bitmap;
             }

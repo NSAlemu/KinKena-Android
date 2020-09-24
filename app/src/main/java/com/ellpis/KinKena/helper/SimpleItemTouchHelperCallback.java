@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ellpis.KinKena.ForegroundService;
 import com.ellpis.KinKena.MusicPlayerSheet;
 import com.ellpis.KinKena.R;
 
@@ -110,6 +111,9 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int i) {
         // Notify the adapter of the dismissal
+        mAdapter.onItemDismiss(i);
+        MusicPlayerSheet.queue.remove(i);
+        MusicPlayerSheet.concatenatedSource.removeMediaSource(i);
     }
 
     @Override

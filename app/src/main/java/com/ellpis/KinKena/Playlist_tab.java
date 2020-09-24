@@ -16,9 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ellpis.KinKena.Adapters.PlaylistTabAdapter;
+import com.ellpis.KinKena.Objects.Dialogs;
 import com.ellpis.KinKena.Objects.Playlist;
-import com.ellpis.KinKena.Objects.Song;
-import com.ellpis.KinKena.Objects.Utility;
 import com.ellpis.KinKena.Repository.DownloadsRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
@@ -76,7 +75,7 @@ public class Playlist_tab extends Fragment implements PlaylistTabAdapter.ItemCli
         createPlaylist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Utility.createPlaylist(getContext(), adapter);
+                Dialogs.createPlaylist(getContext(), adapter);
             }
         });
         settingsBtn.setOnClickListener(settingsOnClick());
@@ -98,6 +97,9 @@ public class Playlist_tab extends Fragment implements PlaylistTabAdapter.ItemCli
             playlist.add(document.toObject(Playlist.class));
             final int pos = playlist.size() - 1;
             playlist.get(pos).setId(document.getId());
+            if(!playlist.get(pos).isFromFirebase()){
+                playlist.get(pos).setId(playlist.get(pos).getOwnerID());
+            }
             DownloadsRepository.updateDownloadedPlaylist(document.toObject(Playlist.class),getActivity());
             if (!playlist.get(pos).isFromFirebase()) {
                 playlist.get(pos).setSubtitle("Arifzfen");

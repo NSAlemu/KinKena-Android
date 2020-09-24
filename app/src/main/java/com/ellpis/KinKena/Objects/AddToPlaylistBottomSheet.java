@@ -56,7 +56,7 @@ public class AddToPlaylistBottomSheet extends BottomSheetDialog implements Playl
         newPlaylist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Utility.createPlaylist(getContext(), song);
+                Dialogs.createPlaylist(getContext(), song);
                 AddToPlaylistBottomSheet.this.dismiss();
             }
         });
